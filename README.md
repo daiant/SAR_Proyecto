@@ -9,6 +9,6 @@ el próximo curso.
 El objetivo del presente proyecto es la implementación en python3 de un sistema de indexación
 y recuperación de noticias.
 
-A Javier le funciona.
-A Pau le funciona.
-A Max le funciona.
+A Javier le funciona.<br/>
+A Pau le funciona.<br/>
+A Max le funciona.<br/>
