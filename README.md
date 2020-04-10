@@ -8,4 +8,6 @@ y Algorítmica (semestre 4A). Esto implica que el código desarrollado por cada 
 parte se utilizará, por el mismo grupo, como base para el proyecto de la asignatura de ALT
 el próximo curso.
 El objetivo del presente proyecto es la implementación en python3 de un sistema de indexación
-y recuperación de noticias. 
+y recuperación de noticias.
+
+A Javier le funciona
