@@ -11,3 +11,4 @@ y recuperación de noticias.
 
 A Javier le funciona
 A Pau le funciona
+A Max le funciona
