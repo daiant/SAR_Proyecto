@@ -1,6 +1,5 @@
 # SAR_Proyecto
-Trabajo en grupo (grupos de 4 personas). Si el grupo de trabajo para el proyecto de
-prácticas es distinto al grupo para el proyecto de teoría, avisad al profesor de prácticas.
+Trabajo en grupo (grupos de 4 personas) de la asignatura SAR de la UPV. Todos los miembros del proyecto son muy guapos.
 ## Objetivo
 El presente proyecto de prácticas de SAR es la primera parte del proyecto conjunto entra las
 asignaturas de Sistemas de Almacenamiento y Recuperación de Información (semestre 3B)
