@@ -10,3 +10,4 @@ El objetivo del presente proyecto es la implementación en python3 de un sistema
 y recuperación de noticias.
 
 A Javier le funciona
+A Pau le funciona
