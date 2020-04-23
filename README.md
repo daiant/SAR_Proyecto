@@ -10,10 +10,10 @@ El objetivo del presente proyecto es la implementación en python3 de un sistema
 y recuperación de noticias.
 
 ## Funcionalidades extra
--- Posicionales
--- Stemming
--- Paréntesis
--- Multifield
+-- Posicionales<br/>
+-- Stemming<br/>
+-- Paréntesis<br/>
+-- Multifield<br/>
 
 ## Créditos
 Carsengi
