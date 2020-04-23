@@ -7,7 +7,7 @@ import re
 class SAR_Project:
     """
     Prototipo de la clase para realizar la indexacion y la recuperacion de noticias
-        
+
         Preparada para todas las ampliaciones:
           parentesis + multiples indices + posicionales + stemming + permuterm + ranking de resultado
 
@@ -21,8 +21,8 @@ class SAR_Project:
     fields = [("title", True), ("date", False),
               ("keywords", True), ("article", True),
               ("summary", True)]
-    
-    
+
+
     # numero maximo de documento a mostrar cuando self.show_all es False
     SHOW_MAX = 10
 
@@ -33,12 +33,14 @@ class SAR_Project:
         NECESARIO PARA LA VERSION MINIMA
 
         Incluye todas las variables necesaria para todas las ampliaciones.
-        Puedes añadir más variables si las necesitas 
+        Puedes añadir más variables si las necesitas
 
         """
         self.index = {} # hash para el indice invertido de terminos --> clave: termino, valor: posting list.
                         # Si se hace la implementacion multifield, se pude hacer un segundo nivel de hashing de tal forma que:
                         # self.index['title'] seria el indice invertido del campo 'title'.
+        self.doc_id = 0 ## Id de los doc, goes from 1 to infinity
+        self.news_id = 0 ## Id de las noticias, goes from 1 to infinity
         self.sindex = {} # hash para el indice invertido de stems --> clave: stem, valor: lista con los terminos que tienen ese stem
         self.ptindex = {} # hash para el indice permuterm.
         self.docs = {} # diccionario de terminos --> clave: entero(docid),  valor: ruta del fichero.
@@ -63,7 +65,7 @@ class SAR_Project:
         """
 
         Cambia el modo de mostrar los resultados.
-        
+
         input: "v" booleano.
 
         UTIL PARA TODAS LAS VERSIONES
@@ -78,7 +80,7 @@ class SAR_Project:
         """
 
         Cambia el modo de mostrar snippet.
-        
+
         input: "v" booleano.
 
         UTIL PARA TODAS LAS VERSIONES
@@ -93,7 +95,7 @@ class SAR_Project:
         """
 
         Cambia el modo de stemming por defecto.
-        
+
         input: "v" booleano.
 
         UTIL PARA LA VERSION CON STEMMING
@@ -108,7 +110,7 @@ class SAR_Project:
         """
 
         Cambia el modo de ranking por defecto.
-        
+
         input: "v" booleano.
 
         UTIL PARA LA VERSION CON RANKING DE NOTICIAS
@@ -131,7 +133,7 @@ class SAR_Project:
     def index_dir(self, root, **args):
         """
         NECESARIO PARA TODAS LAS VERSIONES
-        
+
         Recorre recursivamente el directorio "root"  y indexa su contenido
         los argumentos adicionales "**args" solo son necesarios para las funcionalidades ampliadas
 
@@ -141,17 +143,19 @@ class SAR_Project:
         self.positional = args['positional']
         self.stemming = args['stem']
         self.permuterm = args['permuterm']
-
+        print("Retrieving information...")
         for dir, subdirs, files in os.walk(root):
+            print("Searching directories...")
+            print("Indexing files...")
             for filename in files:
                 if filename.endswith('.json'):
                     fullname = os.path.join(dir, filename)
                     self.index_file(fullname)
-
+            print("Indexing complete!")
         ##########################################
         ## COMPLETAR PARA FUNCIONALIDADES EXTRA ##
         ##########################################
-        
+
 
     def index_file(self, filename):
         """
@@ -170,8 +174,21 @@ class SAR_Project:
         """
 
         with open(filename) as fh:
-            jlist = json.load(fh)
-
+            self.doc_id += 1 # id del filename
+            self.docs[self.doc_id] = filename # esto es así?
+            jlist = json.load(fh) # To Do: asignar id al fichero filename
+            for noticia in jlist: # To Do: asignar id a la noticia
+                self.news_id += 1 # id de la noticia
+                self.news[self.news_id] = self.docs[self.doc_id] + ": " + noticia["id"] # Sé que se podría hacer con filename
+                                                                                        # pero esto me parece más limpio
+                content = noticia["article"]
+                tokens = self.tokenize(content) # indexar el contenido de tokens (noticia + posición)
+                aux = {}
+                for token in tokens:
+                    aux[token] = aux.get(token, 0) + 1 ## se cuenta las ocurrencias en la noticia
+                for word in aux:
+                     self.index[word] = self.index.get(word, []) # si no existía el token crea una lista vacía
+                     self.index[word].append([self.news_id, aux[word]]) # se añade la lista de tokens con el id de la noticia
         #
         # "jlist" es una lista con tantos elementos como noticias hay en el fichero,
         # cada noticia es un diccionario con los campos:
@@ -212,14 +229,14 @@ class SAR_Project:
         self.stemmer.stem(token) devuelve el stem del token
 
         """
-        
+
         pass
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
         ####################################################
 
 
-    
+
     def make_permuterm(self):
         """
         NECESARIO PARA LA AMPLIACION DE PERMUTERM
@@ -238,21 +255,43 @@ class SAR_Project:
     def show_stats(self):
         """
         NECESARIO PARA TODAS LAS VERSIONES
-        
+
         Muestra estadisticas de los indices
-        
+
         """
-        pass
+
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
+        print("\n========================================")
+        print("Number of indexed days:", len(self.docs))
+        print("----------------------------------------")
+        print("Number of indexed news:", len(self.news))
+        print("----------------------------------------")
+        print("TOKENS:")
+        print("  # of tokens in 'article':", len(self.index))
+        if(self.multifield): # hay que cambiar lo de self.index obviamente
+            print("  # of tokens in 'title':", len(self.index))
+            print("  # of tokens in 'date':", len(self.index))
+            print("  # of tokens in 'keywords':", len(self.index))
+            print("  # of tokens in 'summary':", len(self.index))
+        print("----------------------------------------")
+        if(self.stemming):
+            print("STEMS:")
+            print("  # of stems in 'article':", len(self.index))
+            if(self.multifield):
+                print("  # of stems in 'title':", len(self.index))
+                print("  # of stems in 'date':", len(self.index))
+                print("  # of stems in 'keywords':", len(self.index))
+                print("  # of stems in 'summary':", len(self.index))
+        if(self.positional):
+            print("Positional queries are allowed")
+        else:
+            print("Positional queries are NOT allowed")
+        print("========================================")
 
-        
-
-
-
-
-
+        ## Como los permuterm no existen en nuestro diseño
+        ## no me voy a molestar en implementarlo
 
 
 
@@ -286,14 +325,14 @@ class SAR_Project:
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
 
- 
+
 
 
     def get_posting(self, term, field='article'):
         """
         NECESARIO PARA TODAS LAS VERSIONES
 
-        Devuelve la posting list asociada a un termino. 
+        Devuelve la posting list asociada a un termino.
         Dependiendo de las ampliaciones implementadas "get_posting" puede llamar a:
             - self.get_positionals: para la ampliacion de posicionales
             - self.get_permuterm: para la ampliacion de permuterms
@@ -343,7 +382,7 @@ class SAR_Project:
         return: posting list
 
         """
-        
+
         stem = self.stemmer.stem(term)
 
         ####################################################
@@ -385,7 +424,7 @@ class SAR_Project:
         return: posting list con todos los newid exceptos los contenidos en p
 
         """
-        
+
         pass
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
@@ -405,7 +444,7 @@ class SAR_Project:
         return: posting list con los newid incluidos en p1 y p2
 
         """
-        
+
         pass
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
@@ -426,7 +465,7 @@ class SAR_Project:
 
         """
 
-        
+
         pass
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
@@ -447,7 +486,7 @@ class SAR_Project:
 
         """
 
-        
+
         pass
         ########################################################
         ## COMPLETAR PARA TODAS LAS VERSIONES SI ES NECESARIO ##
@@ -468,7 +507,7 @@ class SAR_Project:
         """
         NECESARIO PARA TODAS LAS VERSIONES
 
-        Resuelve una consulta y la muestra junto al numero de resultados 
+        Resuelve una consulta y la muestra junto al numero de resultados
 
         param:  "query": query que se debe resolver.
 
@@ -493,11 +532,11 @@ class SAR_Project:
         param:  "query": query que se debe resolver.
 
         return: el numero de noticias recuperadas, para la opcion -T
-        
+
         """
         result = self.solve_query(query)
         if self.use_ranking:
-            result = self.rank_result(result, query)   
+            result = self.rank_result(result, query)
 
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
@@ -521,7 +560,7 @@ class SAR_Project:
         """
 
         pass
-        
+
         ###################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE RANKING ##
         ###################################################
