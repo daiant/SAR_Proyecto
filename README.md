@@ -9,6 +9,14 @@ el próximo curso.
 El objetivo del presente proyecto es la implementación en python3 de un sistema de indexación
 y recuperación de noticias.
 
+## Funcionalidades extra
+-- Posicionales
+-- Stemming
+-- Paréntesis
+-- Multifield
+
+## Créditos
+Carsengi
 A Javier le funciona.<br/>
 A Pau le funciona.<br/>
 A Max le funciona.<br/>
