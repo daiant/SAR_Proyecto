@@ -188,7 +188,9 @@ class SAR_Project:
                     aux[token] = aux.get(token, 0) + 1 ## se cuenta las ocurrencias en la noticia
                 for word in aux:
                      self.index[word] = self.index.get(word, []) # si no existía el token crea una lista vacía
-                     self.index[word].append([self.news_id, aux[word]]) # se añade la lista de tokens con el id de la noticia
+                     posting_item = Posting(self.news_id, aux[word])
+                     self.index[word].append(posting_item) # se añade el posting item
+
         #
         # "jlist" es una lista con tantos elementos como noticias hay en el fichero,
         # cada noticia es un diccionario con los campos:
@@ -571,8 +573,7 @@ aprovechar la orientación a objetos, en vez de hacerlo con listas. Sobretodo pe
 en la mejora de las posicionales: para no tener que iterar por "listas de listas de listas".
 """
 class Posting:
-    
+
     def __init__(self, news_id, frequency):
         self.news_id = news_id
         self.frequency = frequency
-        
