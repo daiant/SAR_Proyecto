@@ -443,7 +443,8 @@ class SAR_Project:
         ########################################
 
 
-
+    #Precondición: p1 y p2 son listas de postings:
+    #[Posting]
     def and_posting(self, p1, p2):
         """
         NECESARIO PARA TODAS LAS VERSIONES
@@ -454,13 +455,29 @@ class SAR_Project:
 
 
         return: posting list con los newid incluidos en p1 y p2
+        
 
         """
-
-        pass
-        ########################################
-        ## COMPLETAR PARA TODAS LAS VERSIONES ##
-        ########################################
+        res = []
+        i = 0   #Indice de p1
+        j = 0   #Indice de p2
+        if (len(p1) == 0 or len(p2) == 0):
+            return res
+        #Tenemos un elemento en p1 y p2. Comprobamos tipo,
+        #solo por seguridad
+        if not (isinstance(p1[i], Posting)):
+            raise Exception("and_posting: El tipo de la posting list no es Posting")
+        while (i < len(p1) and j < len(p2)):
+            if (p1[i].news_id == p2[j].news_id):
+                res.append(p1[i])
+                i+=1
+                j+=1
+            elif (p1[i].news_id < p2[j].news_id):
+                i+=1
+            else:
+                j+=1
+        
+        return res
 
 
 
