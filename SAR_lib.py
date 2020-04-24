@@ -564,3 +564,15 @@ class SAR_Project:
         ###################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE RANKING ##
         ###################################################
+
+"""
+La idea de esta clase es que los posting de los índices sean objetos estructurados,
+aprovechar la orientación a objetos, en vez de hacerlo con listas. Sobretodo pensando
+en la mejora de las posicionales: para no tener que iterar por "listas de listas de listas".
+"""
+class Posting:
+    
+    def __init__(self, news_id, frequency):
+        self.news_id = news_id
+        self.frequency = frequency
+        
