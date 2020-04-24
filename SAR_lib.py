@@ -36,7 +36,13 @@ class SAR_Project:
         Puedes añadir más variables si las necesitas
 
         """
-        self.index = {} # hash para el indice invertido de terminos --> clave: termino, valor: posting list.
+        self.index = {
+            "title": {},
+            "article": {},
+            "summary": {},
+            "keywords": {},
+            "date": {}
+        } # hash para el indice invertido de terminos --> clave: termino, valor: posting list.
                         # Si se hace la implementacion multifield, se pude hacer un segundo nivel de hashing de tal forma que:
                         # self.index['title'] seria el indice invertido del campo 'title'.
         self.doc_id = 0 ## Id de los doc, goes from 1 to infinity
@@ -145,13 +151,11 @@ class SAR_Project:
         self.permuterm = args['permuterm']
         print("Retrieving information...")
         for dir, subdirs, files in os.walk(root):
-            print("Searching directories...")
-            print("Indexing files...")
             for filename in files:
                 if filename.endswith('.json'):
                     fullname = os.path.join(dir, filename)
                     self.index_file(fullname)
-            print("Indexing complete!")
+        print("Indexing complete!")
         ##########################################
         ## COMPLETAR PARA FUNCIONALIDADES EXTRA ##
         ##########################################
@@ -174,6 +178,11 @@ class SAR_Project:
         """
 
         with open(filename) as fh:
+            if(self.multifield):
+                sections = ['title','article', 'summary', 'keywords', 'date']
+            else:
+                sections = ['article']
+
             self.doc_id += 1 # id del filename
             self.docs[self.doc_id] = filename # esto es así?
             jlist = json.load(fh) # To Do: asignar id al fichero filename
@@ -181,15 +190,15 @@ class SAR_Project:
                 self.news_id += 1 # id de la noticia
                 self.news[self.news_id] = self.docs[self.doc_id] + ": " + noticia["id"] # Sé que se podría hacer con filename
                                                                                         # pero esto me parece más limpio
-                content = noticia["article"]
-                tokens = self.tokenize(content) # indexar el contenido de tokens (noticia + posición)
-                aux = {}
-                for token in tokens:
-                    aux[token] = aux.get(token, 0) + 1 ## se cuenta las ocurrencias en la noticia
-                for word in aux:
-                     self.index[word] = self.index.get(word, []) # si no existía el token crea una lista vacía
-                     posting_item = Posting(self.news_id, aux[word])
-                     self.index[word].append(posting_item) # se añade el posting item
+                for section in sections: # por el multifield
+                    content = noticia[section]
+                    tokens = self.tokenize(content)
+                    aux = {}
+                    for token in tokens:
+                        aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
+                    for word in aux:
+                        self.index[section][word] = self.index[section].get(word, []) # si no existe se crea una lista
+                        self.index[section][word].append(Posting(self.news_id, aux[word])) # se crea el posting del token en la noticia en la sección
 
         #
         # "jlist" es una lista con tantos elementos como noticias hay en el fichero,
@@ -203,6 +212,9 @@ class SAR_Project:
         #################
         ### COMPLETAR ###
         #################
+
+    def index_multifield(self, noticia):
+        sections = ['title', 'summary', 'keywords', 'date']
 
 
 
@@ -265,27 +277,25 @@ class SAR_Project:
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
+        if(self.multifield):
+            sections = ['title','article','summary','keywords','date']
+        else:
+            sections = ['article']
+
         print("\n========================================")
         print("Number of indexed days:", len(self.docs))
         print("----------------------------------------")
         print("Number of indexed news:", len(self.news))
         print("----------------------------------------")
         print("TOKENS:")
-        print("  # of tokens in 'article':", len(self.index))
-        if(self.multifield): # hay que cambiar lo de self.index obviamente
-            print("  # of tokens in 'title':", len(self.index))
-            print("  # of tokens in 'date':", len(self.index))
-            print("  # of tokens in 'keywords':", len(self.index))
-            print("  # of tokens in 'summary':", len(self.index))
+        for i in sections:
+            print("  # of tokens in {}: {}".format(i, len(self.index[i])))
         print("----------------------------------------")
         if(self.stemming):
             print("STEMS:")
-            print("  # of stems in 'article':", len(self.index))
-            if(self.multifield):
-                print("  # of stems in 'title':", len(self.index))
-                print("  # of stems in 'date':", len(self.index))
-                print("  # of stems in 'keywords':", len(self.index))
-                print("  # of stems in 'summary':", len(self.index))
+            for i in sections:
+                print("  # of stems in {}: {}".format(i, len(self.index[i]))) # aún falta hacer cosas
+            print("----------------------------------------")
         if(self.positional):
             print("Positional queries are allowed")
         else:
