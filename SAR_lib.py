@@ -491,19 +491,23 @@ class SAR_Project:
         #Tenemos un elemento en p1 y p2. Comprobamos tipo,
         #solo por seguridad
         if not (isinstance(p1[i], Posting)):
-            raise Exception("and_posting: El tipo de la posting list no es Posting")
+            raise Exception("and_posting: El tipo de la posting list no es [Posting]")
         while (i < len(p1) and j < len(p2)):
             if (p1[i].news_id == p2[j].news_id):
-                res.append(p1[i])
                 i+=1
                 j+=1
             elif (p1[i].news_id < p2[j].news_id):
+                res.append(p1[i])
                 i+=1
+                j+=1
             else:
                 j+=1
         
+        while (i < len(p1)):
+            res.append(p1[i])
+            i+=1
+            
         return res
-
 
 
     def or_posting(self, p1, p2):
@@ -525,7 +529,8 @@ class SAR_Project:
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
 
-
+    #Precondición: p1 y p2 son listas de postings:
+    #[Posting]
     def minus_posting(self, p1, p2):
         """
         OPCIONAL PARA TODAS LAS VERSIONES
@@ -539,12 +544,30 @@ class SAR_Project:
         return: posting list con los newid incluidos de p1 y no en p2
 
         """
+        res = []
+        i = 0   #Indice de p1
+        j = 0   #Indice de p2
+        if (len(p1) == 0):
+            return res
+        if (len(p2) == 0):
+            return p1
+        
+        #Tenemos un elemento en p1 y p2. Comprobamos tipo,
+        #solo por seguridad
+        if not (isinstance(p1[i], Posting)):
+            raise Exception("minus_posting: El tipo de la posting list no es [Posting]")
+        while (i < len(p1) and j < len(p2)):
+            if (p1[i].news_id == p2[j].news_id):
+                res.append(p1[i])
+                i+=1
+                j+=1
+            elif (p1[i].news_id < p2[j].news_id):
+                i+=1
+            else:
+                j+=1
+        
+        return res
 
-
-        pass
-        ########################################################
-        ## COMPLETAR PARA TODAS LAS VERSIONES SI ES NECESARIO ##
-        ########################################################
 
 
 
