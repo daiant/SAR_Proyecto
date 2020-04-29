@@ -437,10 +437,35 @@ class SAR_Project:
 
         """
 
-        pass
-        ########################################
-        ## COMPLETAR PARA TODAS LAS VERSIONES ##
-        ########################################
+        """
+        El objetivo es encontrar todas las noticias y
+        devolverlas en formato posting list. Realmente esto
+        lo podemos hacer si iteramos por todo el diccionario
+        de noticias y para cada una creamos un objeto posting. Perdemos la información posicional... pero
+        no vamos a tener una consulta como
+        "valencia AND NOT playa", así que no importa
+        """
+        res = []
+        #IMPORTANTE: p y news están ordenados
+        j = 0   #El índice de la noticia que queremos omitir
+        #Se puede hacer en tiempo lineal con la talla de news
+        keys = self.news.keys()
+        for i in range(0,len(keys)):
+            #p[j] es un objeto de tipo Posting
+            if (keys[i] != p[j].news_id):
+                #Añadimos un posting correspondiente a la noticia (perdemos frequency y positional pero no importa)
+                res.append(Posting(keys[i]))
+            else:
+                j+=1
+                if (j == len(p)):
+                    i+=1
+                    break #Todas las demás noticias no están en p y deben ser añadidas
+        
+        for k in range(i,len(keys)):
+            res.append(Posting(keys[k]))
+        
+        return res
+
 
 
     #Precondición: p1 y p2 son listas de postings:
@@ -604,3 +629,15 @@ class Posting:
     def __init__(self, news_id, frequency):
         self.news_id = news_id
         self.frequency = frequency
+        
+    def __init__(self, news_id):
+        self.news_id = news_id
+        self.frequency = 1
+        
+    def __eq__(self, other):
+        if isinstance(other, Posting):
+            return self.news_id == other.news_id
+        else:
+            return NotImplemented
+    
+    
