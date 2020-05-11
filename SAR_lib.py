@@ -2,7 +2,7 @@ import json
 from nltk.stem.snowball import SnowballStemmer
 import os
 import re
-
+import shlex
 
 class SAR_Project:
     """
@@ -333,17 +333,59 @@ class SAR_Project:
         if query is None or len(query) == 0:
             return []
 
-        ########################################
-        ## COMPLETAR PARA TODAS LAS VERSIONES ##
-        ########################################
-
+        class State(Enum):
+            POST = auto()   #Representa una posting list de un término
+            OP = auto()     #Representa una operación
+            PAR = auto()    #Representa un paréntesis
+            
+        #shlex mantiene el texto entre comillas con posix=False
+        #y separa los paréntesis en tokens únicos con punctuation_chars=True
+        #técnicamente con punctuation_chars separa los caracteres ();<>|&
+        #también separa con los dos puntos (:) lo cual es raro pero funciona así
+        
+        #Haremos una primera pasada para hacer las queries al sistema de recuperación.
+        #Después las uniremos con AND, OR, NOT y los paréntesis
+        
+        tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
+        elements=[]
+        t = tokens.get_token()
+        while (t != ''):
+            if (t == 'AND') or (t == 'OR') or (t == 'NOT'):
+                elements.append((State.OP, t))
+                t = tokens.get_token()
+                
+            elif (t == '(') or (t == ')'):
+                elements.append((State.PAR, t))
+                t = tokens.get_token()
+                
+            else: #token
+                t0 = t
+                t = tokens.get_token() #fortunately, if it's eof, shlex returns '' and we can work with that
+                
+                if (t == ':'):  #it's a multifield term and t0 is the field
+                    t = tokens.get_token() #t is now the next token
+                    if (t[0] == '"'): #positional
+                        elements.append((State.POST, self.get_positionals(t[1:-1], field=t0)))
+                    else: #normal
+                        elements.append((State.POST, self.get_posting(t, field=t0)))
+                    
+                    t = tokens.get_token()
+                else:   #no multifield
+                    if (t[0] == '"'):
+                        elements.append((State.POST, self.get_positionals(t0)))
+                    else:
+                        elements.append((State.POST, self.get_posting(t0)))
+                    #t is the next token
+        
+        #Ahora elements es una lista (pila) de tuplas (State, object) con la que podemos organizar un analizador
+        #léxico
 
 
 
     def get_posting(self, term, field='article'):
         """
         NECESARIO PARA TODAS LAS VERSIONES
-
+        Luego las uniremos con la consulta
         Devuelve la posting list asociada a un termino.
         Dependiendo de las ampliaciones implementadas "get_posting" puede llamar a:
             - self.get_positionals: para la ampliacion de posicionales
@@ -376,10 +418,8 @@ class SAR_Project:
         return: posting list
 
         """
-        pass
-        ########################################################
-        ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE POSICIONALES ##
-        ########################################################
+        #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
+        
 
 
     def get_stemming(self, term, field='article'):
