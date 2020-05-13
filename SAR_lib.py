@@ -534,10 +534,10 @@ class SAR_Project:
             raise Exception("and_posting: El tipo de la posting list no es [Posting]")
         while (i < len(p1) and j < len(p2)):
             if (p1[i].news_id == p2[j].news_id):
+                res.append(p1[i])
                 i+=1
                 j+=1
             elif (p1[i].news_id < p2[j].news_id):
-                res.append(p1[i])
                 i+=1
                 j+=1
             else:
