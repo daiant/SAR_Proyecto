@@ -363,7 +363,7 @@ class SAR_Project:
                 t = tokens.get_token() #fortunately, if it's eof, shlex returns '' and we can work with that
                 
                 if (t == ':'):  #it's a multifield term and t0 is the field
-                    t = tokens.get_token() #t is now the next token
+                    t = tokens.get_token() #t is now the token to search
                     if (t[0] == '"'): #positional
                         elements.append((State.POST, self.get_positionals(t[1:-1], field=t0)))
                     else: #normal
@@ -371,7 +371,7 @@ class SAR_Project:
                     
                     t = tokens.get_token()
                 else:   #no multifield
-                    if (t[0] == '"'):
+                    if (t0[0] == '"'):
                         elements.append((State.POST, self.get_positionals(t0)))
                     else:
                         elements.append((State.POST, self.get_posting(t0)))
