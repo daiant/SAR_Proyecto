@@ -345,11 +345,7 @@ class SAR_Project:
 
         #Haremos una primera pasada para hacer las queries al sistema de recuperación.
         #Después las uniremos con AND, OR, NOT y los paréntesis
-        
-        #Si aparece un token después de un token hay que hacer un and entre los dos.
-        #En ese caso añadiremos un AND a la pila de objetos que quedará como resultado
-        token_after_token = False
-        
+
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
         elements=[]
         t = tokens.get_token()
@@ -357,26 +353,19 @@ class SAR_Project:
             if (t == 'AND') or (t == 'OR') or (t == 'NOT'):
                 elements.append((State.OP, t))
                 t = tokens.get_token()
-                token_after_token = False
-                
+
             elif (t == '(') or (t == ')'):
                 elements.append((State.PAR, t))
                 t = tokens.get_token()
-                token_after_token = False
-                
+
             else: #token
-                
-                #If there were two consecutive tokens, we need to make an AND between them.
-                #We push an AND onto the stack
-                if token_after_token:
-                    elements.append((State.OP, "AND"))
-                    
                 t0 = t
                 t = tokens.get_token() #fortunately, if it's eof, shlex returns '' and we can work with that
-                
-                
+
                 if (t == ':'):  #it's a multifield term and t0 is the field
                     t = tokens.get_token() #t is now the token to search
+                    if (t[0] == '"'): #positional
+                        elements.append((State.POST, self.get_positionals(t[1:-1], field=t0)))
                     else: #normal
                         elements.append((State.POST, self.get_posting(t, field=t0)))
 
@@ -388,8 +377,6 @@ class SAR_Project:
                         elements.append((State.POST, self.get_posting(t0)))
                     #t is the next token
 
-                token_after_token = True
-        
         #Ahora elements es una lista (pila) de tuplas (State, object) con la que podemos organizar un analizador
         #léxico
 
@@ -552,6 +539,7 @@ class SAR_Project:
                 j+=1
             elif (p1[i].news_id < p2[j].news_id):
                 i+=1
+                j+=1
             else:
                 j+=1
 

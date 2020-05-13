@@ -337,12 +337,12 @@ class SAR_Project:
             POST = auto()   #Representa una posting list de un término
             OP = auto()     #Representa una operación
             PAR = auto()    #Representa un paréntesis
-
+            
         #shlex mantiene el texto entre comillas con posix=False
         #y separa los paréntesis en tokens únicos con punctuation_chars=True
         #técnicamente con punctuation_chars separa los caracteres ();<>|&
         #también separa con los dos puntos (:) lo cual es raro pero funciona así
-
+        
         #Haremos una primera pasada para hacer las queries al sistema de recuperación.
         #Después las uniremos con AND, OR, NOT y los paréntesis
         
@@ -379,7 +379,7 @@ class SAR_Project:
                     t = tokens.get_token() #t is now the token to search
                     else: #normal
                         elements.append((State.POST, self.get_posting(t, field=t0)))
-
+                    
                     t = tokens.get_token()
                 else:   #no multifield
                     if (t0[0] == '"'):
@@ -387,7 +387,8 @@ class SAR_Project:
                     else:
                         elements.append((State.POST, self.get_posting(t0)))
                     #t is the next token
-
+                
+                
                 token_after_token = True
         
         #Ahora elements es una lista (pila) de tuplas (State, object) con la que podemos organizar un analizador
@@ -432,7 +433,7 @@ class SAR_Project:
 
         """
         #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
-
+        
 
 
     def get_stemming(self, term, field='article'):
@@ -513,10 +514,10 @@ class SAR_Project:
                 if (j == len(p)):
                     i+=1
                     break #Todas las demás noticias no están en p y deben ser añadidas
-
+        
         for k in range(i,len(keys)):
             res.append(Posting(keys[k]))
-
+        
         return res
 
 
@@ -533,7 +534,7 @@ class SAR_Project:
 
 
         return: posting list con los newid incluidos en p1 y p2
-
+        
 
         """
         res = []
@@ -554,11 +555,11 @@ class SAR_Project:
                 i+=1
             else:
                 j+=1
-
+        
         while (i < len(p1)):
             res.append(p1[i])
             i+=1
-
+            
         return res
 
 
@@ -574,29 +575,9 @@ class SAR_Project:
         return: posting list con los newid incluidos de p1 o p2
 
         """
-        res = []
-        i = 0   #Indice de p1
-        j = 0   #Indice de p2
-        if (len(p1) == 0):
-            return p2
-        if (len(p2) == 0):
-            return p1
-        #Tenemos un elemento en p1 y p2. Comprobamos tipo,
-        #solo por seguridad
-        if not (isinstance(p1[i], Posting)):
-            raise Exception("or_posting: El tipo de la posting list no es [Posting]")
-        while (i < len(p1) and j < len(p2)):
-            if (p1[i].news_id == p2[j].news_id):
-                res.append(p1[i])
-                i+=1
-                j+=1
-            elif (p1[i].news_id < p2[j].news_id):
-                res.append(p1[i])
-                i+=1
-            else:
-                res.append(p2[j])
-                j+=1
-        return res
+
+
+        pass
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
@@ -623,7 +604,7 @@ class SAR_Project:
             return res
         if (len(p2) == 0):
             return p1
-
+        
         #Tenemos un elemento en p1 y p2. Comprobamos tipo,
         #solo por seguridad
         if not (isinstance(p1[i], Posting)):
@@ -637,7 +618,7 @@ class SAR_Project:
                 i+=1
             else:
                 j+=1
-
+        
         return res
 
 
@@ -724,13 +705,15 @@ class Posting:
     def __init__(self, news_id, frequency):
         self.news_id = news_id
         self.frequency = frequency
-
+        
     def __init__(self, news_id):
         self.news_id = news_id
         self.frequency = 1
-
+        
     def __eq__(self, other):
         if isinstance(other, Posting):
             return self.news_id == other.news_id
         else:
             return NotImplemented
+    
+    
