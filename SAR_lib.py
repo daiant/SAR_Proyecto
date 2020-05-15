@@ -40,14 +40,18 @@ class SAR_Project:
             "title": {},
             "article": {},
             "summary": {},
-            "keywords": {},
-            "date": {}
+            "keywords": {}
         } # hash para el indice invertido de terminos --> clave: termino, valor: posting list.
                         # Si se hace la implementacion multifield, se pude hacer un segundo nivel de hashing de tal forma que:
                         # self.index['title'] seria el indice invertido del campo 'title'.
         self.doc_id = 0 ## Id de los doc, goes from 1 to infinity
         self.news_id = 0 ## Id de las noticias, goes from 1 to infinity
-        self.sindex = {} # hash para el indice invertido de stems --> clave: stem, valor: lista con los terminos que tienen ese stem
+        self.sindex = {
+                    "title": {},
+                    "article": {},
+                    "summary": {},
+                    "keywords": {}
+        } # hash para el indice invertido de stems --> clave: stem, valor: lista con los terminos que tienen ese stem
         self.ptindex = {} # hash para el indice permuterm.
         self.docs = {} # diccionario de terminos --> clave: entero(docid),  valor: ruta del fichero.
         self.weight = {} # hash de terminos para el pesado, ranking de resultados. puede no utilizarse
@@ -58,6 +62,7 @@ class SAR_Project:
         self.show_snippet = False # valor por defecto, se cambia con self.set_snippet()
         self.use_stemming = False # valor por defecto, se cambia con self.set_stemming()
         self.use_ranking = False  # valor por defecto, se cambia con self.set_ranking()
+        self.sections = ["article"]
 
 
     ###############################
@@ -178,32 +183,44 @@ class SAR_Project:
         """
 
         with open(filename) as fh:
-            if(self.multifield):
-                sections = ['title','article', 'summary', 'keywords', 'date']
-            else:
-                sections = ['article']
+            if self.multifield:
+                self.sections = ['title', 'keywords', "article", 'summary']
 
             self.doc_id += 1 # id del filename
-            self.docs[self.doc_id] = filename # esto es así?
-            jlist = json.load(fh) # To Do: asignar id al fichero filename
-            for noticia in jlist: # To Do: asignar id a la noticia
+            self.docs[self.doc_id] = filename
+            jlist = json.load(fh)
+            for noticia in jlist:
                 self.news_id += 1 # id de la noticia
                 self.news[self.news_id] = self.docs[self.doc_id] + ": " + noticia["id"] # Sé que se podría hacer con filename
                                                                                         # pero esto me parece más limpio
-                for section in sections: # por el multifield
+                for section in self.sections: # por el multifield
                     content = noticia[section]
                     tokens = self.tokenize(content)
+                    pos = 0
                     aux = {}
-                    for token in tokens:
-                        aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
-                    for word in aux:
-                        self.index[section][word] = self.index[section].get(word, []) # si no existe se crea una lista
-                        self.index[section][word].append(Posting(self.news_id, aux[word])) # se crea el posting del token en la noticia en la sección
+                    position = {}
+                    if self.positional:
+                        for token in tokens:
+                            pos+=1
+                            aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
+                            position[token] = position.get(token, [])
+                            position[token].append(pos)
+                        for word in aux:
+                            self.index[section][word] = self.index[section].get(word, []) # si no existe se crea una lista
+                            self.index[section][word].append(Posting(self.news_id, aux[word], position[word])) # se crea el posting del token en la noticia en la sección
+                    else:
+                        for token in tokens:
+                            aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
+                        for word in aux:
+                            self.index[section][word] = self.index[section].get(word, []) # si no existe se crea una lista
+                            self.index[section][word].append(Posting(self.news_id, aux[word])) # se crea el posting del token en la noticia en la sección
+                    if self.stemming:
+                        self.make_stemming(section, tokens)
 
         #
         # "jlist" es una lista con tantos elementos como noticias hay en el fichero,
         # cada noticia es un diccionario con los campos:
-        #      "title", "date", "keywords", "article", "summary"
+        #      "title", "keywords", "article", "summary"
         #
         # En la version basica solo se debe indexar el contenido "article"
         #
@@ -213,7 +230,8 @@ class SAR_Project:
         ### COMPLETAR ###
         #################
 
-    def index_multifield(self, noticia):
+
+    def index_multifield(self, noticia): # no sé por qué está esto aquí
         sections = ['title', 'summary', 'keywords', 'date']
 
 
@@ -234,7 +252,7 @@ class SAR_Project:
 
 
 
-    def make_stemming(self):
+    def make_stemming(self, section, tokens):
         """
         NECESARIO PARA LA AMPLIACION DE STEMMING.
 
@@ -243,8 +261,27 @@ class SAR_Project:
         self.stemmer.stem(token) devuelve el stem del token
 
         """
-
-        pass
+        pos = 0
+        aux = {}
+        position = {}
+        if self.positional:
+            for token in tokens:
+                token = self.stemmer.stem(token)
+                print(token)
+                pos+=1
+                aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
+                position[token] = position.get(token, [])
+                position[token].append(pos)
+                for word in aux:
+                    self.sindex[section][word] = self.sindex[section].get(word, []) # si no existe se crea una lista
+                    self.sindex[section][word].append(Posting(self.news_id, aux[word], position[word])) # se crea el posting del token en la noticia en la sección
+        else:
+            for token in tokens:
+                token = self.stemmer.stem(token)
+                aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
+            for word in aux:
+                self.sindex[section][word] = self.sindex[section].get(word, []) # si no existe se crea una lista
+                self.sindex[section][word].append(Posting(self.news_id, aux[word])) # se crea el posting del token en la noticia en la sección
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
         ####################################################
@@ -278,7 +315,7 @@ class SAR_Project:
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
         if(self.multifield):
-            sections = ['title','article','summary','keywords','date']
+            sections = ['title','article','summary','keywords']
         else:
             sections = ['article']
 
@@ -294,7 +331,7 @@ class SAR_Project:
         if(self.stemming):
             print("STEMS:")
             for i in sections:
-                print("  # of stems in {}: {}".format(i, len(self.index[i]))) # aún falta hacer cosas
+                print("  # of stems in {}: {}".format(i, len(self.sindex[i]))) # aún falta hacer cosas
             print("----------------------------------------")
         if(self.positional):
             print("Positional queries are allowed")
@@ -304,7 +341,6 @@ class SAR_Project:
 
         ## Como los permuterm no existen en nuestro diseño
         ## no me voy a molestar en implementarlo
-
 
 
     ###################################
@@ -345,11 +381,11 @@ class SAR_Project:
 
         #Haremos una primera pasada para hacer las queries al sistema de recuperación.
         #Después las uniremos con AND, OR, NOT y los paréntesis
-        
+
         #Si aparece un token después de un token hay que hacer un and entre los dos.
         #En ese caso añadiremos un AND a la pila de objetos que quedará como resultado
         token_after_token = False
-        
+
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
         elements=[]
         t = tokens.get_token()
@@ -358,23 +394,23 @@ class SAR_Project:
                 elements.append((State.OP, t))
                 t = tokens.get_token()
                 token_after_token = False
-                
+
             elif (t == '(') or (t == ')'):
                 elements.append((State.PAR, t))
                 t = tokens.get_token()
                 token_after_token = False
-                
+
             else: #token
-                
+
                 #If there were two consecutive tokens, we need to make an AND between them.
                 #We push an AND onto the stack
                 if token_after_token:
                     elements.append((State.OP, "AND"))
-                    
+
                 t0 = t
                 t = tokens.get_token() #fortunately, if it's eof, shlex returns '' and we can work with that
-                
-                
+
+
                 if (t == ':'):  #it's a multifield term and t0 is the field
                     t = tokens.get_token() #t is now the token to search
                     elements.append((State.POST, self.get_posting(t, field=t0)))
@@ -385,7 +421,7 @@ class SAR_Project:
                     #t is the next token
 
                 token_after_token = True
-        
+
         #Ahora elements es una lista (pila) de tuplas (State, object) con la que podemos organizar un analizador
         #léxico
 
@@ -717,13 +753,16 @@ en la mejora de las posicionales: para no tener que iterar por "listas de listas
 """
 class Posting:
 
-    def __init__(self, news_id, frequency):
+    def __init__(self, news_id, frequency=None, pos=None):
         self.news_id = news_id
-        self.frequency = frequency
-
-    def __init__(self, news_id):
-        self.news_id = news_id
-        self.frequency = 1
+        if frequency is not None:
+            self.frequency = frequency
+        else:
+            self.frequency = 1
+        if pos is not None:
+            self.pos = pos
+        else:
+            self.pos = []
 
     def __eq__(self, other):
         if isinstance(other, Posting):
