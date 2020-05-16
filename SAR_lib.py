@@ -716,8 +716,15 @@ class SAR_Project:
 
         """
         result = self.solve_query(query)
+        jlist = json.load(fh)
         if self.use_ranking:
             result = self.rank_result(result, query)
+        print("%s\t%d" % (query, len(result)))
+        if self.show_snippet:
+            if result != []:
+                firstPost = result[1]
+                article = jlist[1]["article"]
+        return len(result)  # para verificar los resultados (op: -T)
 
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
@@ -769,14 +776,12 @@ class Posting:
             return self.news_id == other.news_id
         else:
             return NotImplemented
-        
+
     def __str__(self):
         rep = "ID:{},freq:{}".format(self.news_id, self.frequency)
         if len(self.pos) > 0:
-            rep += ",pos:" + str(self.pos[0]) 
+            rep += ",pos:" + str(self.pos[0])
             for i in range(1,len(self.pos)):
                 rep += ", {}".format(self.pos[i])
-        
+
         return rep
-         
-        
