@@ -196,24 +196,7 @@ class SAR_Project:
                 for section in self.sections: # por el multifield
                     content = noticia[section]
                     tokens = self.tokenize(content)
-                    pos = 0
-                    aux = {}
-                    position = {}
-                    if self.positional:
-                        for token in tokens:
-                            pos+=1
-                            aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
-                            position[token] = position.get(token, [])
-                            position[token].append(pos)
-                        for word in aux:
-                            self.index[section][word] = self.index[section].get(word, []) # si no existe se crea una lista
-                            self.index[section][word].append(Posting(self.news_id, aux[word], position[word])) # se crea el posting del token en la noticia en la sección
-                    else:
-                        for token in tokens:
-                            aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
-                        for word in aux:
-                            self.index[section][word] = self.index[section].get(word, []) # si no existe se crea una lista
-                            self.index[section][word].append(Posting(self.news_id, aux[word])) # se crea el posting del token en la noticia en la sección
+                    self.indexing(tokens, section, self.index, self.positional)
                     if self.stemming:
                         self.make_stemming(section, tokens)
 
@@ -230,11 +213,25 @@ class SAR_Project:
         ### COMPLETAR ###
         #################
 
-
-    def index_multifield(self, noticia): # no sé por qué está esto aquí
-        sections = ['title', 'summary', 'keywords', 'date']
-
-
+    def indexing(self, tokens, section, dict, positional=False):
+        """
+        Función de apoyo para el indexador de las noticias.
+        Recibe como parámetros los tokens de una sección determinada, la dicha sección,
+        el dicccionario donde debe ser indexado y si debe tratar posicionales.
+        """
+        aux = {}
+        position = {}
+        pos = 0
+        for token in tokens:
+            pos+=1
+            aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
+        if positional:
+            for token in tokens:
+                position[token] = position.get(token, [])
+                position[token].append(pos)
+        for word in aux:
+            dict[section][word] = dict[section].get(word, []) # si no existe se crea una lista
+            dict[section][word].append(Posting(self.news_id, aux[word], position.get(word, None))) # se crea el posting del token en la noticia en la sección
 
     def tokenize(self, text):
         """
@@ -261,27 +258,12 @@ class SAR_Project:
         self.stemmer.stem(token) devuelve el stem del token
 
         """
-        pos = 0
-        aux = {}
-        position = {}
-        if self.positional:
-            for token in tokens:
-                token = self.stemmer.stem(token)
-                print(token)
-                pos+=1
-                aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
-                position[token] = position.get(token, [])
-                position[token].append(pos)
-                for word in aux:
-                    self.sindex[section][word] = self.sindex[section].get(word, []) # si no existe se crea una lista
-                    self.sindex[section][word].append(Posting(self.news_id, aux[word], position[word])) # se crea el posting del token en la noticia en la sección
-        else:
-            for token in tokens:
-                token = self.stemmer.stem(token)
-                aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
-            for word in aux:
-                self.sindex[section][word] = self.sindex[section].get(word, []) # si no existe se crea una lista
-                self.sindex[section][word].append(Posting(self.news_id, aux[word])) # se crea el posting del token en la noticia en la sección
+        stems = []
+        for token in tokens:
+            stem = self.stemmer.stem(token) # Esto tarda muchísimo
+            stems.append(stem)
+
+        self.indexing(stems, section, self.sindex, self.positional)
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
         ####################################################
@@ -481,6 +463,7 @@ class SAR_Project:
         """
 
         stem = self.stemmer.stem(term)
+        return self.sindex[field][stem]
 
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
