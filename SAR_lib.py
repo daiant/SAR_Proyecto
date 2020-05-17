@@ -371,6 +371,9 @@ class SAR_Project:
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
         elements=[]
         t = tokens.get_token()
+        
+        terms=[]
+        
         while (t != ''):
             if (t == 'AND') or (t == 'OR') or (t == 'NOT'):
                 elements.append((State.OP, t))
@@ -392,21 +395,86 @@ class SAR_Project:
                 t0 = t
                 t = tokens.get_token() #fortunately, if it's eof, shlex returns '' and we can work with that
 
-
                 if (t == ':'):  #it's a multifield term and t0 is the field
                     t = tokens.get_token() #t is now the token to search
                     elements.append((State.POST, self.get_posting(t, field=t0)))
-
                     t = tokens.get_token()
+                    terms.append(t)
                 else:   #no multifield
                     elements.append((State.POST, self.get_posting(t0)))
+                    terms.append(t0)
                     #t is the next token
 
                 token_after_token = True
 
         #Ahora elements es una lista (pila) de tuplas (State, object) con la que podemos organizar un analizador
-        #léxico
-
+        #léxico tipo autómata a pila (utilizamos la pila para los paréntesis).
+        
+        stack=[]
+        funcdict = {
+            "AND":self.and_posting,
+            "OR":self.or_posting,
+            "AND NOT":self.minus_posting
+        } #Diccionario de operaciones binarias :)
+        
+        ornot=False
+        
+        for obj in elements:
+            computed=False
+            while not(computed):
+                #De normal una iteración bastará para procesar un elemento de la query
+                computed=True
+                state=None 
+                if (len(stack) > 0):
+                    state = stack[-1][0]
+                    
+                if (state == None) or (state == State.PAR):
+                    #Estamos al principio de una consulta o con un paréntesis izquierdo. Añadimos lo que haya al stack
+                    stack.append(obj)
+                    
+                elif (state == State.POST):
+                    #Después de un posting puede haber una operación o un paréntesis de cierre:
+                    if (obj[0] == State.OP):
+                        stack.append(obj)
+                    elif (obj[0] == State.PAR):
+                        #Hemos completado un paréntesis. Tenemos que eliminar los paréntesis, dejar el contenido en el
+                        #nivel inferior, y volver a computar este término.
+                        obj = stack.pop() #Obj es la posting list que hay dentro del paréntesis
+                        stack.pop() #Eliminamos el paréntesis abierto
+                        #Y volvemos a operar con el posting del paréntesis
+                        computed=False
+                        
+                else: #OP
+                    #Después de una operación puede haber un posting (realizar operación), un NOT (para el AND/OR NOT) o un paréntesis (posponer la operación)
+                    if (obj[0] == State.PAR):
+                        stack.append(obj)
+                    elif (obj[0] == State.OP):
+                        #Puede ser AND NOT u OR NOT. 
+                        if (stack[-1][1] == "AND"):
+                            stack[-1][1] = "AND NOT"
+                        elif (stack[-1][1] == "OR"):
+                            stack.append(obj)
+                            ornot=True
+                    elif (obj[0] == State.POST):
+                        #Operar según la operación
+                        op = stack.pop()[1]
+                        if (op == "NOT"):
+                            post = self.reverse_posting(obj[1])
+                            if ornot:
+                                obj = (State.POST, post)
+                                #Dejamos que vuelva a iterar para que compute el OR,
+                                #que está debajo en el stack
+                                computed=False
+                            else:
+                                stack.append((State.POST, post))
+                        else:
+                            t1 = stack.pop()[1] #Posting de detrás de la operación
+                            post = funcdict[op](t1, obj[1]) #Realizar la operación que toca
+                            stack.append((State.POST, post)) #Dejamos el resultado en el stack
+                            computed = True
+            
+        #Ahora deberíamos tener en el stack un solo posting con todo.
+        return stack[0][1], terms
 
 
     def get_posting(self, term, field='article'):
