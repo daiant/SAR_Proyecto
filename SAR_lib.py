@@ -678,7 +678,7 @@ class SAR_Project:
         return: el numero de noticias recuperadas, para la opcion -T
 
         """
-        result = self.solve_query(query)
+        result = self.solve_query(query)[0]
         print("%s\t%d" % (query, len(result)))
         return len(result)  # para verificar los resultados (op: -T)
 
@@ -698,22 +698,40 @@ class SAR_Project:
         return: el numero de noticias recuperadas, para la opcion -T
 
         """
-        result = self.solve_query(query)
+        result = self.solve_query(query)[0]
+        query = self.solve_query(query)[1]
         jlist = json.load(fh)
         if self.use_ranking:
             result = self.rank_result(result, query)
         print("%s\t%d" % (query, len(result)))
         if self.show_snippet:
             if result != []:
-                firstPost = result[1]
-                article = jlist[1]["article"]
+                #we get a list of all ids of the articles found
+                ids = [x.news_id for x in result]
+                #we get the original articles based on their ids
+                articles = [x for x in jlist if x["id"] in ids]
+
+                print_snippet(articles, query, 20)
         return len(result)  # para verificar los resultados (op: -T)
 
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
 
-
+    def print_snippet(self, articles, query, range):
+        for token in query:
+            for article in articles:
+                #let's try and find the first instance of the token in the articles of the result
+                text = article["article"]
+                pos = text.find(str(token))
+                if(pos != -1):
+                    #we found the instance of token at pos, let's get a snippet
+                    lpos = max(0, text.rfind(" ",,pos-range)) #left side of the snippet
+                    rpos = min(len(text), text.find(" ",pos+range)) #right side of the snippet
+                    if(rpos == -1): rpos = len(text)
+                    snippet = text[lpos:rpos]
+                    print(str(token) + "->\t"article["title"] + ":\n(#)..." + snippet + "...(#)")
+        return
 
 
     def rank_result(self, result, query):
