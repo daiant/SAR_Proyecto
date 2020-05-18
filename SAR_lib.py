@@ -160,6 +160,8 @@ class SAR_Project:
                 if filename.endswith('.json'):
                     fullname = os.path.join(dir, filename)
                     self.index_file(fullname)
+        if self.stemming:
+            self.make_stemming()
         print("Indexing complete!")
         ##########################################
         ## COMPLETAR PARA FUNCIONALIDADES EXTRA ##
@@ -196,10 +198,19 @@ class SAR_Project:
                 for section in self.sections: # por el multifield
                     content = noticia[section]
                     tokens = self.tokenize(content)
-                    self.indexing(tokens, section, self.index, self.positional)
-                    if self.stemming:
-                        self.make_stemming(section, tokens)
-
+                    aux = {}
+                    position = {}
+                    pos = 0
+                    for token in tokens:
+                        pos+=1
+                        aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
+                    if self.positional:
+                        for token in tokens:
+                            position[token] = position.get(token, [])
+                            position[token].append(pos)
+                    for word in aux:
+                        self.index[section][word] = self.index[section].get(word, []) # si no existe se crea una lista
+                        self.index[section][word].append(Posting(self.news_id, aux[word], position.get(word, None))) # se crea el posting del token en la noticia en la sección
         #
         # "jlist" es una lista con tantos elementos como noticias hay en el fichero,
         # cada noticia es un diccionario con los campos:
@@ -213,25 +224,6 @@ class SAR_Project:
         ### COMPLETAR ###
         #################
 
-    def indexing(self, tokens, section, dict, positional=False):
-        """
-        Función de apoyo para el indexador de las noticias.
-        Recibe como parámetros los tokens de una sección determinada, la dicha sección,
-        el dicccionario donde debe ser indexado y si debe tratar posicionales.
-        """
-        aux = {}
-        position = {}
-        pos = 0
-        for token in tokens:
-            pos+=1
-            aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
-        if positional:
-            for token in tokens:
-                position[token] = position.get(token, [])
-                position[token].append(pos)
-        for word in aux:
-            dict[section][word] = dict[section].get(word, []) # si no existe se crea una lista
-            dict[section][word].append(Posting(self.news_id, aux[word], position.get(word, None))) # se crea el posting del token en la noticia en la sección
 
     def tokenize(self, text):
         """
@@ -249,7 +241,7 @@ class SAR_Project:
 
 
 
-    def make_stemming(self, section, tokens):
+    def make_stemming(self):
         """
         NECESARIO PARA LA AMPLIACION DE STEMMING.
 
@@ -258,12 +250,12 @@ class SAR_Project:
         self.stemmer.stem(token) devuelve el stem del token
 
         """
-        stems = []
-        for token in tokens:
-            stem = self.stemmer.stem(token) # Esto tarda muchísimo
-            stems.append(stem)
+        for section in self.sections:
+            for word in self.index[section]:
+                stem = self.stemmer.stem(word)
+                self.sindex[section][stem] = self.sindex[section].get(stem, []) # si no existe se crea una lista
+                self.sindex[section][stem].append(self.index[section][word]) # se unen al stem las estadísticas de la palabra. OJO de index
 
-        self.indexing(stems, section, self.sindex, self.positional)
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
         ####################################################
@@ -296,23 +288,18 @@ class SAR_Project:
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
-        if(self.multifield):
-            sections = ['title','article','summary','keywords']
-        else:
-            sections = ['article']
-
         print("\n========================================")
         print("Number of indexed days:", len(self.docs))
         print("----------------------------------------")
         print("Number of indexed news:", len(self.news))
         print("----------------------------------------")
         print("TOKENS:")
-        for i in sections:
+        for i in self.sections:
             print("  # of tokens in {}: {}".format(i, len(self.index[i])))
         print("----------------------------------------")
         if(self.stemming):
             print("STEMS:")
-            for i in sections:
+            for i in self.sections:
                 print("  # of stems in {}: {}".format(i, len(self.sindex[i]))) # aún falta hacer cosas
             print("----------------------------------------")
         if(self.positional):
@@ -371,9 +358,9 @@ class SAR_Project:
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
         elements=[]
         t = tokens.get_token()
-        
+
         terms=[]
-        
+
         while (t != ''):
             if (t == 'AND') or (t == 'OR') or (t == 'NOT'):
                 elements.append((State.OP, t))
@@ -409,29 +396,29 @@ class SAR_Project:
 
         #Ahora elements es una lista (pila) de tuplas (State, object) con la que podemos organizar un analizador
         #léxico tipo autómata a pila (utilizamos la pila para los paréntesis).
-        
+
         stack=[]
         funcdict = {
             "AND":self.and_posting,
             "OR":self.or_posting,
             "AND NOT":self.minus_posting
         } #Diccionario de operaciones binarias :)
-        
+
         ornot=False
-        
+
         for obj in elements:
             computed=False
             while not(computed):
                 #De normal una iteración bastará para procesar un elemento de la query
                 computed=True
-                state=None 
+                state=None
                 if (len(stack) > 0):
                     state = stack[-1][0]
-                    
+
                 if (state == None) or (state == State.PAR):
                     #Estamos al principio de una consulta o con un paréntesis izquierdo. Añadimos lo que haya al stack
                     stack.append(obj)
-                    
+
                 elif (state == State.POST):
                     #Después de un posting puede haber una operación o un paréntesis de cierre:
                     if (obj[0] == State.OP):
@@ -443,13 +430,13 @@ class SAR_Project:
                         stack.pop() #Eliminamos el paréntesis abierto
                         #Y volvemos a operar con el posting del paréntesis
                         computed=False
-                        
+
                 else: #OP
                     #Después de una operación puede haber un posting (realizar operación), un NOT (para el AND/OR NOT) o un paréntesis (posponer la operación)
                     if (obj[0] == State.PAR):
                         stack.append(obj)
                     elif (obj[0] == State.OP):
-                        #Puede ser AND NOT u OR NOT. 
+                        #Puede ser AND NOT u OR NOT.
                         if (stack[-1][1] == "AND"):
                             stack[-1][1] = "AND NOT"
                         elif (stack[-1][1] == "OR"):
@@ -472,7 +459,7 @@ class SAR_Project:
                             post = funcdict[op](t1, obj[1]) #Realizar la operación que toca
                             stack.append((State.POST, post)) #Dejamos el resultado en el stack
                             computed = True
-            
+
         #Ahora deberíamos tener en el stack un solo posting con todo.
         return stack[0][1], terms
 
@@ -794,11 +781,11 @@ class SAR_Project:
                 pos = text.find(str(token))
                 if(pos != -1):
                     #we found the instance of token at pos, let's get a snippet
-                    lpos = max(0, text.rfind(" ",,pos-range)) #left side of the snippet
+                    lpos = max(0, text.rfind(" ",pos-range)) #left side of the snippet
                     rpos = min(len(text), text.find(" ",pos+range)) #right side of the snippet
                     if(rpos == -1): rpos = len(text)
                     snippet = text[lpos:rpos]
-                    print(str(token) + "->\t"article["title"] + ":\n(#)..." + snippet + "...(#)")
+                    print(str(token) + "->\t" + article["title"] + ":\n(#)..." + snippet + "...(#)")
         return
 
 
