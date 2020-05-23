@@ -538,24 +538,22 @@ class SAR_Project:
         #x,y: contadores de posiciones dentro de un posting
         while (i < len(p1) and j < len(p2)): # mientras no se hayan explorado todos los posting de alguna de las dos listas
             if(p1[i].news_id == p2[j].news_id): # se comprueba que los news_id de sendos posting son iguales
-                aux = []
+                positions = []
                 pos1 = p1[i].pos #pos1 = lista de posiciones de p1[1]
                 pos2 = p2[j].pos #pos2 = lista de posiciones de p2[2]
                 while(x < len(pos1)): #vamos recorriendo pos1
                     while (y < len(pos2)): #recorremos pos2
-                        if(abs(pos2[y]-pos1[x]) <= 1): #suponemos
-                            aux.append(pos2[y])
-                            if(pos2[y] > pos1[x]):
-                                break
-                        y=y+1
-                        while (aux is not [] and abs(aux[0] - pos1[x]) > 1):
-                            aux = aux[1:]
-                        for ps in aux:
-                            elem = Posting(p1[i].news_id, ps)
-                            res.append(elem)
-                        x = x+1
-                    i = i+1
-                    j = j+1
+                        if(pos2[y]-pos1[x] == 1): # si pos2 es inmediatamente posterior a pos1:
+                            positions.append(pos2[y]) # en ese caso se añade la posición posterior a la lista auxiliar
+                        elif(pos2[y] > pos1[x]): #si pos2 está por encima de pos1
+                            x=x+1
+                            break
+                        else:
+                            y=y+1
+                            break
+
+                i = i+1
+                j = j+1
             elif(p1[i].news_id < p2[j].news_id):
                 i = i+1
             else:
