@@ -879,14 +879,14 @@ class SAR_Project:
             for article in articles:
                 #let's try and find the first instance of the token in the articles of the result
                 text = article["article"].lower()
-                pos = text.find(str(token))
+                pos = text.find(str(token.lower()))
                 if(pos != -1):
                     i+=1
                     #we found the instance of token at pos, let's get a snippet
                     lpos = max(0, text.rfind(" ", 0, pos-range)) #left side of the snippet
                     rpos = min(len(text), text.find(" ",pos+range)) #right side of the snippet
                     if(rpos == -1): rpos = len(text)
-                    snippet = text[lpos:rpos]
+                    snippet = article["article"][lpos:rpos]
                     print(str(token) + "->\t" + article["title"] + ":\n(#)..." + snippet + "...(#)")
                     if not(self.show_all) and i>9:
                         break
