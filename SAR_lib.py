@@ -482,10 +482,14 @@ class SAR_Project:
 
         """
         term_t = self.tokenize(term)
-        if(len(term_t) > 1):
-            return self.get_positionals(term_t, field)
+        #obtenemos el/los términos en formato token
+        if (len(term_t) > 1):
+            for i in range(0,len(term_t)):  #si hay más de un término se aplica el stemming a cada término individual y se llama a get_positionals
+                term_t[i] = self.get_stemming(term_t[i],field)
+            self.get_positionals(term_t, field)
         else:
-            return self.index[field][term]
+            new_t = self.get_stemming(term,field)
+            return self.index[field][new_t]
 
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
@@ -506,11 +510,44 @@ class SAR_Project:
 
         """
         #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
-        res = self.index[term[1]]
-        for i in range(2,len(terms)):
-            while res != []:
-                
+        p1 = self.index[field][terms[0]]
+        for i in range(1,len(terms)):
+            p1 = interseccion_posicional(p1,self.index[field][terms[i]])
+        return p1
 
+
+    def interseccion_posicional(p1,p2):
+        #recupera una posting list con los valores Posting de términos consecutivos
+        #p1, p2: posting lists, posición en p1 debe ser menor que la de p2
+        res = []
+        i=0
+        j=0
+        x=0
+        y=0
+        while (i < len(p1) && j < len(p2)):
+            if(p1[i].news_id == p2[j].news_id):
+                aux = []
+                pos1 = p1[i].pos
+                pos2 = p2[j].pos
+                while(x < pos1):
+                    while (y < pos2):
+                        if(abs(pos2[y]-pos1[x]) <= 1):
+                            aux = append(aux,pos2[y])
+                            if(pos2[y] > pos1[x]):
+                                break
+                        y=y+1
+                        while (aux is not [] && abs(aux[0] - pos1[x]) > 1):
+                            aux = aux[1:]
+                        for ps in aux:
+                            res = append(res, (p1[i].news_id, pos1[x],ps))
+                        x = x+1
+                    i = i+1
+                    j = j+1
+            elif(p1[i].news_id < p2[j].news_id):
+                i = i+1
+            else:
+                j = j+1
+        return res
 
 
     def get_stemming(self, term, field='article'):
