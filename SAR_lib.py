@@ -526,7 +526,7 @@ class SAR_Project:
         x=0
         y=0
         #x,y: contadores de posiciones dentro de un posting
-        while (i < len(p1) && j < len(p2)): # mientras no se hayan explorado todos los posting de alguna de las dos listas
+        while (i < len(p1) and j < len(p2)): # mientras no se hayan explorado todos los posting de alguna de las dos listas
             if(p1[i].news_id == p2[j].news_id): # se comprueba que los news_id de sendos posting son iguales
                 aux = []
                 pos1 = p1[i].pos
@@ -538,7 +538,7 @@ class SAR_Project:
                             if(pos2[y] > pos1[x]):
                                 break
                         y=y+1
-                        while (aux is not [] && abs(aux[0] - pos1[x]) > 1):
+                        while (aux is not [] and abs(aux[0] - pos1[x]) > 1):
                             aux = aux[1:]
                         for ps in aux:
                             res.append((p1[i].news_id, ps))
