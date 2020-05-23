@@ -547,6 +547,9 @@ class SAR_Project:
                     while (y < len(pos2)): # se detiene solo si x excede la cantidad de pos de p1
                         if(pos2[y]-pos1[x] == 1): # si pos2 es inmediatamente posterior a pos1:
                             positions.append(pos2[y]) # en ese caso se añade la posición posterior a la lista de posiciones
+                            x=x+1 #una vez encontradas las posiciones contiguas avanzamos
+                            y=y+1
+                            break:
                         elif(pos2[y] > pos1[x]): #si pos2 está por encima de pos1, aumentar pos1 y volver a probar
                             x=x+1
                             break
