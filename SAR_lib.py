@@ -255,7 +255,7 @@ class SAR_Project:
             for word in self.index[section]:
                 stem = self.stemmer.stem(word)
                 self.sindex[section][stem] = self.sindex[section].get(stem, []) # si no existe se crea una lista
-                self.sindex[section][stem] += self.index[section][word] # se unen al stem las estadísticas de la palabra. OJO de index
+                self.sindex[section][stem].append(self.index[section][word]) # se unen al stem las estadísticas de la palabra. OJO de index
 
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
@@ -489,7 +489,10 @@ class SAR_Project:
         if (len(term_t) > 1): #si hay más de un término se aplica el stemming a cada término individual y se llama a get_positionals
             return self.get_positionals(term_t, field)
         else:
-            return self.get_stemming(term[0],field)
+            if(use_stemming):
+                return self.get_stemming[field][term_t]
+            else:
+                return self.index[field][term_t])
 
 
         ########################################
@@ -511,9 +514,14 @@ class SAR_Project:
 
         """
         #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
-        p1 = self.get_stemming(terms[0],field)
-        for i in range(1,len(terms)):
-            p1 = self.interseccion_posicional(p1,self.get_stemming(terms[i],field))
+        if(use_stemming):
+            p1 = self.get_stemming(terms[0],field)
+            for i in range(1,len(terms)):
+                p1 = self.interseccion_posicional(p1,self.get_stemming(terms[i],field))
+        else:
+            p1 = self.index[field][terms[0]]
+            for i in range(1,len(terms)):
+                p1 = self.interseccion_posicional(p1,self.index[field][terms[i]])
         return p1
 
 
