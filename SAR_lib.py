@@ -526,9 +526,9 @@ class SAR_Project:
             for i in range(1,len(terms)):
                 p1 = self.interseccion_posicional(p1,self.get_stemming(terms[i],field))
         else:
-            p1 = self.index[field][terms[0]]
+            p1 = self.index[field].get(terms[0], [])
             for i in range(1,len(terms)):
-                p1 = self.interseccion_posicional(p1,self.index[field][terms[i]])
+                p1 = self.interseccion_posicional(p1,self.index[field].get(terms[i], []))
         return p1
 
 
@@ -878,7 +878,7 @@ class SAR_Project:
             i=0
             for article in articles:
                 #let's try and find the first instance of the token in the articles of the result
-                text = article["article"]
+                text = article["article"].lower()
                 pos = text.find(str(token))
                 if(pos != -1):
                     i+=1
