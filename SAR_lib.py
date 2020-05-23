@@ -255,7 +255,7 @@ class SAR_Project:
             for word in self.index[section]:
                 stem = self.stemmer.stem(word)
                 self.sindex[section][stem] = self.sindex[section].get(stem, []) # si no existe se crea una lista
-                self.sindex[section][stem].append(self.index[section][word]) # se unen al stem las estadísticas de la palabra. OJO de index
+                self.sindex[section][stem] += self.index[section][word] # se unen al stem las estadísticas de la palabra. OJO de index
 
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
