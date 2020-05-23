@@ -541,8 +541,8 @@ class SAR_Project:
                 aux = []
                 pos1 = p1[i].pos #pos1 = lista de posiciones de p1[1]
                 pos2 = p2[j].pos #pos2 = lista de posiciones de p2[2]
-                while(x < pos1): #vamos recorriendo pos1
-                    while (y < pos2): #recorremos pos2
+                while(x < len(pos1)): #vamos recorriendo pos1
+                    while (y < len(pos2)): #recorremos pos2
                         if(abs(pos2[y]-pos1[x]) <= 1): #suponemos
                             aux.append(pos2[y])
                             if(pos2[y] > pos1[x]):
