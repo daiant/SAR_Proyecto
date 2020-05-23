@@ -355,7 +355,7 @@ class SAR_Project:
         #Si aparece un token después de un token hay que hacer un and entre los dos.
         #En ese caso añadiremos un AND a la pila de objetos que quedará como resultado
         token_after_token = False
-
+        print("query:{}".format(query))
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
         elements=[]
         t = tokens.get_token()
@@ -363,6 +363,7 @@ class SAR_Project:
         terms=[]
 
         while (t != ''):
+            print("token:{}".format(t))
             if (t == 'AND') or (t == 'OR') or (t == 'NOT'):
                 elements.append((State.OP, t))
                 t = tokens.get_token()
