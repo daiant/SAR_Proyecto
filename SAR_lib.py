@@ -489,7 +489,7 @@ class SAR_Project:
                 term_t[i] = self.get_stemming(term_t[i],field)
             self.get_positionals(term_t, field)
         else:
-            new_t = self.get_stemming(term,field)
+            new_t = self.get_stemming(term[0],field)
             return self.index[field][new_t]
 
         ########################################
