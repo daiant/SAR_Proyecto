@@ -829,9 +829,10 @@ class SAR_Project:
                 #we get a list of all ids of the articles found
                 ids = [x.news_id for x in result]
                 #we change the int ids to the hashed ids of the articles
-                hids = set()
+                hids = list()
                 for id in ids:
-                    hids = hids.union(self.news[id].split("$$$")[1])
+                    aa = self.news[id].split("$$$")[1]
+                    hids.append(aa)
                 hids = list(hids)
                 #we get the original articles based on their ids
                 articles = [x for x in noticias if x["id"] in hids]
@@ -872,7 +873,7 @@ class SAR_Project:
                 pos = text.find(str(token))
                 if(pos != -1):
                     #we found the instance of token at pos, let's get a snippet
-                    lpos = max(0, text.rfind(" ",pos-range)) #left side of the snippet
+                    lpos = max(0, text.rfind(" ", 0, pos-range)) #left side of the snippet
                     rpos = min(len(text), text.find(" ",pos+range)) #right side of the snippet
                     if(rpos == -1): rpos = len(text)
                     snippet = text[lpos:rpos]
