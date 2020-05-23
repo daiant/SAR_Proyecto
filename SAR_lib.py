@@ -876,7 +876,7 @@ class SAR_Project:
             for article in articles:
                 #let's try and find the first instance of the token in the articles of the result
                 text = article["article"].lower()
-                pos = text.find(str(token))
+                pos = text.find(str(token.lower()))
                 if(pos != -1):
                     i+=1
                     #we found the instance of token at pos, let's get a snippet
