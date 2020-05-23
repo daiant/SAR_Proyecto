@@ -388,10 +388,16 @@ class SAR_Project:
                     t = tokens.get_token() #t is now the token to search
                     elements.append((State.POST, self.get_posting(t, field=t0)))
                     t = tokens.get_token()
-                    terms.append(t)
+                    if (t[0]=='"'):
+                        terms.append(t[1:-1])
+                    else:
+                        terms.append(t)
                 else:   #no multifield
                     elements.append((State.POST, self.get_posting(t0)))
-                    terms.append(t0)
+                    if (t0[0]=='"'):
+                        terms.append(t0[1:-1])
+                    else:
+                        terms.append(t0)
                     #t is the next token
 
                 token_after_token = True
@@ -867,18 +873,21 @@ class SAR_Project:
 
     def print_snippet(self, articles, query, range):
         for token in query:
+            i=0
             for article in articles:
                 #let's try and find the first instance of the token in the articles of the result
                 text = article["article"]
                 pos = text.find(str(token))
                 if(pos != -1):
+                    i+=1
                     #we found the instance of token at pos, let's get a snippet
                     lpos = max(0, text.rfind(" ", 0, pos-range)) #left side of the snippet
                     rpos = min(len(text), text.find(" ",pos+range)) #right side of the snippet
                     if(rpos == -1): rpos = len(text)
                     snippet = text[lpos:rpos]
                     print(str(token) + "->\t" + article["title"] + ":\n(#)..." + snippet + "...(#)")
-                    break
+                    if not(self.show_all) and i>9:
+                        break
         return
 
 
