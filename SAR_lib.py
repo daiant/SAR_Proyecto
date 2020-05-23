@@ -549,7 +549,7 @@ class SAR_Project:
                             positions.append(pos2[y]) # en ese caso se añade la posición posterior a la lista de posiciones
                             x=x+1 #una vez encontradas las posiciones contiguas avanzamos
                             y=y+1
-                            break:
+                            break
                         elif(pos2[y] > pos1[x]): #si pos2 está por encima de pos1, aumentar pos1 y volver a probar
                             x=x+1
                             break
