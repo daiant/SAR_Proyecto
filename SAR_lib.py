@@ -540,12 +540,16 @@ class SAR_Project:
         y=0
         #x,y: contadores de posiciones dentro de un posting
         while (i < len(p1) and j < len(p2)): # mientras no se hayan explorado todos los posting de alguna de las dos listas
+            print("posición de p1: {}".format(i))
+            print("posición de p2: {}".format(j))
             if(p1[i].news_id == p2[j].news_id): # se comprueba que los news_id de sendos posting son iguales
                 positions = [] #lista donde irán las posiciones consecutivas de p1 y p2 que se encuentren
                 pos1 = p1[i].pos #pos1 = lista de posiciones de p1[1]
                 pos2 = p2[j].pos #pos2 = lista de posiciones de p2[2]
                 while(x < len(pos1)): # se detiene solo si x excede la cantidad de pos de p1
+                    print("dentro de p1, analizando posición {}".format(x))
                     while (y < len(pos2)): # se detiene solo si x excede la cantidad de pos de p1
+                    print("dentro de p2, analizando posición {}".format(y))
                         if(pos2[y]-pos1[x] == 1): # si pos2 es inmediatamente posterior a pos1:
                             positions.append(pos2[y]) # en ese caso se añade la posición posterior a la lista de posiciones
                             x=x+1 #una vez encontradas las posiciones contiguas avanzamos
