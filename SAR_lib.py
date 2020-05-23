@@ -857,8 +857,8 @@ class SAR_Project:
         for f in filenames:
             with open(f) as fh:
                 jlist = json.load(fh)
-                articles += [x for x in jlist if x["id"] in newsid]
-        return articles
+                articles = articles.union(set([x for x in jlist if x["id"] in newsid]))
+        return list(articles)
 
     def print_snippet(self, articles, query, range):
         for token in query:
