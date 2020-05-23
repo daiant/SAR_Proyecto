@@ -484,8 +484,7 @@ class SAR_Project:
         """
         term_t = self.tokenize(term)
         #obtenemos el/los términos en formato token
-        if (len(term_t) > 1):
-            for i in range(0,len(term_t)):  #si hay más de un término se aplica el stemming a cada término individual y se llama a get_positionals
+        if (len(term_t) > 1): #si hay más de un término se aplica el stemming a cada término individual y se llama a get_positionals
             self.get_positionals(term_t, field)
         else:
             return self.get_stemming(term[0],field)
