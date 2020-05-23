@@ -544,6 +544,12 @@ class SAR_Project:
         x=0
         y=0
         #x,y: contadores de posiciones dentro de un posting
+        print("p1 news:")
+        for p in p1:
+            print("{}, ".format(p.news_id), end='')
+        print("p2 news:")
+        for p in p2:
+            print("{}, ".format(p.news_id), end='')
         while (i < len(p1) and j < len(p2)): # mientras no se hayan explorado todos los posting de alguna de las dos listas
             if(p1[i].news_id == p2[j].news_id): # se comprueba que los news_id de sendos posting son iguales
                 x=0
@@ -558,7 +564,7 @@ class SAR_Project:
                             positions.append(pos2[y]) # en ese caso se añade la posición posterior a la lista de posiciones
                             x=x+1 #una vez encontradas las posiciones contiguas avanzamos
                             y=y+1
-                            print("posicion encontrada:{}".format(positions))
+                            print("posicion {} en noticia {}".format(positions, p1[i].news_id))
 
                         elif(pos2[y] > pos1[x]): #si pos2 está por encima de pos1, aumentar pos1 y volver a probar
                             x=x+1
@@ -566,7 +572,7 @@ class SAR_Project:
                         else:                   # else solo si pos1 es mayor que pos2, aumentamos pos2 y probar otra vez
                             y=y+1
                             print("aumentar y")
-                if(positions is not None):  # si se han encontrado dos posiciones consecutivas una o más veces
+                if(len(positions) > 0):  # si se han encontrado dos posiciones consecutivas una o más veces
                     elem = Posting(p1[i].news_id,None,positions) # crear una posting list que tenga el id del doc y las posiciones encontradas
                     res.append(elem) #añadir esa posting list al resultado final
                 i = i+1 # ya hemos comprobado las posiciones de ese doc. en ambas posting lists pasamos al siguiente doc.
