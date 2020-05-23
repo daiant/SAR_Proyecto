@@ -529,7 +529,7 @@ class SAR_Project:
         #recupera una posting list con los valores Posting de términos consecutivos
         #p1, p2: posting lists, posición en p1 debe ser menor que la de p2
         print("p1: {}".format(p1))
-        res = []
+        res = [] #posting list final
         i=0
         j=0
         #i,j: contadores de postings en posting list
