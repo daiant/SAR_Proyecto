@@ -255,6 +255,10 @@ class SAR_Project:
             for word in self.index[section]:
                 stem = self.stemmer.stem(word)
                 self.sindex[section][stem] = self.sindex[section].get(stem, []) # si no existe se crea una lista
+                self.sindex[section][stem] += self.index[section][word]
+
+                if len(self.sindex[section][stem]) > 1:
+                    self.sindex[section][stem].sort()
                 #No podemos añadir directamente las news_id porque no estarán en orden
                 #Usamos el algoritmo de fusión del mergesort: fusionar dos listas ya ordenadas
                 i=0
@@ -262,6 +266,7 @@ class SAR_Project:
                 newStem=None
                 newIndex=None
                 res=[]
+                """
                 while (i<len(self.sindex[section][stem])) and (j < len(self.index[section][word])):
                     newStem=self.sindex[section][stem][i].news_id
                     newIndex=self.index[section][word][j].news_id
@@ -285,9 +290,10 @@ class SAR_Project:
                 while (j<len(self.index[section][word])):
                     res.append(self.index[section][word][j])
                     j+=1
-                    
-                self.sindex[section][stem] = res # se unen al stem las estadísticas de la palabra. OJO de index
 
+
+                self.sindex[section][stem] = res # se unen al stem las estadísticas de la palabra. OJO de index
+"""
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
         ####################################################
@@ -993,6 +999,11 @@ class Posting:
     def __eq__(self, other):
         if isinstance(other, Posting):
             return self.news_id == other.news_id
+        else:
+            return NotImplemented
+    def __lt__(self, other):
+        if isinstance(other, Posting):
+            return self.news_id < other.news_id
         else:
             return NotImplemented
 
