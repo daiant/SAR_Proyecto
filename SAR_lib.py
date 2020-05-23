@@ -846,8 +846,8 @@ class SAR_Project:
         newsid = set()
         articles = set()
         #we store all filenames and news_id to search
-        for x in ndocs:
-            doc = x.split(": ")
+        for ndoc in ndocs:
+            doc = ndoc.split(": ")
             filename = doc[0]
             filenames.add(filename)
             nid = doc[1]
