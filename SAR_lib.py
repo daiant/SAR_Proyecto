@@ -541,7 +541,8 @@ class SAR_Project:
                         while (aux is not [] and abs(aux[0] - pos1[x]) > 1):
                             aux = aux[1:]
                         for ps in aux:
-                            res.append((p1[i].news_id, ps))
+                            elem = Posting(p1[i].news_id, ps)
+                            res.append(elem)
                         x = x+1
                     i = i+1
                     j = j+1
