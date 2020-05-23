@@ -551,17 +551,21 @@ class SAR_Project:
                 positions = [] #lista donde irán las posiciones consecutivas de p1 y p2 que se encuentren
                 pos1 = p1[i].pos #pos1 = lista de posiciones de p1[1]
                 pos2 = p2[j].pos #pos2 = lista de posiciones de p2[2]
+                print("pos1 y pos2:{}, {}".format(pos1, pos2))
                 while ((x < len(pos1)) and (y < len(pos2))): # se detiene solo si x excede la cantidad de pos de p1
                     #print("dentro de p2, analizando posición {}".format(y))
                         if(pos2[y]-pos1[x] == 1): # si pos2 es inmediatamente posterior a pos1:
                             positions.append(pos2[y]) # en ese caso se añade la posición posterior a la lista de posiciones
                             x=x+1 #una vez encontradas las posiciones contiguas avanzamos
                             y=y+1
+                            print("posiciones:{}".format(positions))
                             
                         elif(pos2[y] > pos1[x]): #si pos2 está por encima de pos1, aumentar pos1 y volver a probar
                             x=x+1
+                            print("aumentar x")
                         else:                   # else solo si pos1 es mayor que pos2, aumentamos pos2 y probar otra vez
                             y=y+1
+                            print("aumentar y")
                 if(positions is not None):  # si se han encontrado dos posiciones consecutivas una o más veces
                     elem = Posting(p1[i].news_id,None,positions) # crear una posting list que tenga el id del doc y las posiciones encontradas
                     res.append(elem) #añadir esa posting list al resultado final
