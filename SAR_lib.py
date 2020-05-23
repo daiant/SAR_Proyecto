@@ -499,7 +499,7 @@ class SAR_Project:
             if(self.use_stemming):
                 return self.get_stemming(term_t[0],field)
             else:
-                return self.index[field][term_t]
+                return self.index[field].get(term_t[0], [])
 
 
         ########################################
@@ -587,7 +587,6 @@ class SAR_Project:
                 "field": campo sobre el que se debe recuperar la posting list, solo necesario se se hace la ampliacion de multiples indices
 
         return: posting list
-
         """
 
         stem = self.stemmer.stem(term)
