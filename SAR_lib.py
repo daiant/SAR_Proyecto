@@ -883,7 +883,7 @@ class SAR_Project:
                     lpos = max(0, text.rfind(" ", 0, pos-range)) #left side of the snippet
                     rpos = min(len(text), text.find(" ",pos+range)) #right side of the snippet
                     if(rpos == -1): rpos = len(text)
-                    snippet = text[lpos:rpos]
+                    snippet = article["article"][lpos:rpos]
                     print(str(token) + "->\t" + article["title"] + ":\n(#)..." + snippet + "...(#)")
                     if not(self.show_all) and i>9:
                         break
