@@ -481,7 +481,12 @@ class SAR_Project:
         return: posting list
 
         """
-        pass
+        term_t = self.tokenize(term)
+        if(len(term_t) > 1):
+            return self.get_positionals(term_t, field)
+        else:
+            return self.index[field][term]
+
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
@@ -501,6 +506,10 @@ class SAR_Project:
 
         """
         #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
+        res = self.index[term[1]]
+        for i in range(2,len(terms)):
+            while res != []:
+                
 
 
 
