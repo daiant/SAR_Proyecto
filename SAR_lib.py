@@ -588,7 +588,7 @@ class SAR_Project:
         """
 
         stem = self.stemmer.stem(term)
-        return self.sindex[field].get(stem, None)
+        return self.sindex[field].get(stem, [])
 
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
