@@ -203,10 +203,10 @@ class SAR_Project:
                     position = {}
                     pos = 0
                     for token in tokens:
-                        pos+=1
                         aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
                     if self.positional:
                         for token in tokens:
+                            pos+=1
                             position[token] = position.get(token, [])
                             position[token].append(pos)
                     for word in aux:
