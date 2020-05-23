@@ -484,9 +484,10 @@ class SAR_Project:
 
         """
         term_t = self.tokenize(term)
+        print("term_tokenized: {}".format(term_t))
         #obtenemos el/los términos en formato token
         if (len(term_t) > 1): #si hay más de un término se aplica el stemming a cada término individual y se llama a get_positionals
-            self.get_positionals(term_t, field)
+            return self.get_positionals(term_t, field)
         else:
             return self.get_stemming(term[0],field)
 
@@ -519,7 +520,7 @@ class SAR_Project:
     def interseccion_posicional(self,p1,p2):
         #recupera una posting list con los valores Posting de términos consecutivos
         #p1, p2: posting lists, posición en p1 debe ser menor que la de p2
-        print("p1: ".format(p1))
+        print("p1: {}".format(p1))
         res = []
         i=0
         j=0
