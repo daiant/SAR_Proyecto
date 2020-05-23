@@ -833,8 +833,13 @@ class SAR_Project:
             if result != []:
                 #we get a list of all ids of the articles found
                 ids = [x.news_id for x in result]
+                #we change the int ids to the hashed ids of the articles
+                hids = set()
+                for id in ids:
+                    hids = hids.union(self.news[id].split(": ")[1])
+                hids = list(hids)
                 #we get the original articles based on their ids
-                articles = [x for x in noticias if x["id"] in ids]
+                articles = [x for x in noticias if x["id"] in hids]
 
                 self.print_snippet(articles, query, 20)
         return len(result)  # para verificar los resultados (op: -T)
