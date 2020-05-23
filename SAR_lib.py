@@ -3,6 +3,7 @@ from nltk.stem.snowball import SnowballStemmer
 import os
 import re
 import shlex
+from enum import Enum, auto
 
 class SAR_Project:
     """
