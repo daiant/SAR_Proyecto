@@ -357,6 +357,8 @@ class SAR_Project:
         token_after_token = False
         print("query:{}".format(query))
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
+        #Añadir acentos y la ñ a los caracteres normales
+        tokens.wordchars += 'áéíóúüÁÉÍÓÚÜñ'
         elements=[]
         t = tokens.get_token()
 
