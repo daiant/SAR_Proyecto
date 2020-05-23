@@ -486,11 +486,10 @@ class SAR_Project:
         #obtenemos el/los términos en formato token
         if (len(term_t) > 1):
             for i in range(0,len(term_t)):  #si hay más de un término se aplica el stemming a cada término individual y se llama a get_positionals
-                term_t[i] = self.get_stemming(term_t[i],field)
             self.get_positionals(term_t, field)
         else:
-            new_t = self.get_stemming(term[0],field)
-            return self.index[field][new_t]
+            return self.get_stemming(term[0],field)
+
 
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
@@ -511,9 +510,9 @@ class SAR_Project:
 
         """
         #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
-        p1 = self.index[field][terms[0]]
+        p1 = self.get_stemming(terms[0],field)
         for i in range(1,len(terms)):
-            p1 = interseccion_posicional(p1,self.index[field][terms[i]])
+            p1 = interseccion_posicional(p1,self.get_stemming(terms[i],field))
         return p1
 
 
