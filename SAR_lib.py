@@ -529,6 +529,8 @@ class SAR_Project:
     def interseccion_posicional(self,p1,p2):
         #recupera una posting list con los valores Posting de términos consecutivos
         #p1, p2: posting lists, posición en p1 debe ser menor que la de p2
+        #recupera una posting list con los valores Posting de términos consecutivos
+        #p1, p2: posting lists, posición en p1 debe ser menor que la de p2
         print("p1: {}".format(p1))
         res = []
         i=0
@@ -539,7 +541,7 @@ class SAR_Project:
         #x,y: contadores de posiciones dentro de un posting
         while (i < len(p1) and j < len(p2)): # mientras no se hayan explorado todos los posting de alguna de las dos listas
             if(p1[i].news_id == p2[j].news_id): # se comprueba que los news_id de sendos posting son iguales
-                aux = []
+                positions = [] #lista donde irán las posiciones consecutivas de p1 y p2 que se encuentren
                 pos1 = p1[i].pos #pos1 = lista de posiciones de p1[1]
                 pos2 = p2[j].pos #pos2 = lista de posiciones de p2[2]
                 while(x < len(pos1)): # se detiene solo si x excede la cantidad de pos de p1
