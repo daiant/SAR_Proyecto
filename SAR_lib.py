@@ -577,6 +577,7 @@ class SAR_Project:
         """
 
         stem = self.stemmer.stem(term)
+        print("Longitud p1:{}".format(len(self.sindex[field][stem])))
         return self.sindex[field][stem]
 
         ####################################################
@@ -631,7 +632,7 @@ class SAR_Project:
         #IMPORTANTE: p y news están ordenados
         j = 0   #El índice de la noticia que queremos omitir
         #Se puede hacer en tiempo lineal con la talla de news
-        keys = self.news.keys()
+        keys = list(self.news.keys())
         for i in range(0,len(keys)):
             #p[j] es un objeto de tipo Posting
             if (keys[i] != p[j].news_id):
