@@ -357,8 +357,6 @@ class SAR_Project:
         token_after_token = False
         print("query:{}".format(query))
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
-        #Añadir acentos y la ñ a los caracteres normales
-        tokens.wordchars += 'áéíóúüÁÉÍÓÚÜñ'
         elements=[]
         t = tokens.get_token()
 
@@ -532,7 +530,7 @@ class SAR_Project:
         #recupera una posting list con los valores Posting de términos consecutivos
         #p1, p2: posting lists, posición en p1 debe ser menor que la de p2
         print("p1: {}".format(p1))
-        res = [] #posting list final
+        res = []
         i=0
         j=0
         #i,j: contadores de postings en posting list
@@ -541,7 +539,7 @@ class SAR_Project:
         #x,y: contadores de posiciones dentro de un posting
         while (i < len(p1) and j < len(p2)): # mientras no se hayan explorado todos los posting de alguna de las dos listas
             if(p1[i].news_id == p2[j].news_id): # se comprueba que los news_id de sendos posting son iguales
-                positions = [] #lista donde irán las posiciones consecutivas de p1 y p2 que se encuentren
+                aux = []
                 pos1 = p1[i].pos #pos1 = lista de posiciones de p1[1]
                 pos2 = p2[j].pos #pos2 = lista de posiciones de p2[2]
                 while(x < len(pos1)): # se detiene solo si x excede la cantidad de pos de p1
@@ -583,7 +581,6 @@ class SAR_Project:
         """
 
         stem = self.stemmer.stem(term)
-        print("Longitud p1:{}".format(len(self.sindex[field][stem])))
         return self.sindex[field][stem]
 
         ####################################################
@@ -638,7 +635,7 @@ class SAR_Project:
         #IMPORTANTE: p y news están ordenados
         j = 0   #El índice de la noticia que queremos omitir
         #Se puede hacer en tiempo lineal con la talla de news
-        keys = list(self.news.keys())
+        keys = self.news.keys()
         for i in range(0,len(keys)):
             #p[j] es un objeto de tipo Posting
             if (keys[i] != p[j].news_id):
@@ -819,9 +816,10 @@ class SAR_Project:
         return: el numero de noticias recuperadas, para la opcion -T
 
         """
-        result = self.solve_query(query)[0]
-        query = self.solve_query(query)[1]
-        jlist = json.load(fh)
+        sq = self.solve_query(query)
+        result = sq[0]
+        query = sq[1]
+        noticias = self.getNoticias()
         if self.use_ranking:
             result = self.rank_result(result, query)
         print("%s\t%d" % (query, len(result)))
@@ -830,14 +828,35 @@ class SAR_Project:
                 #we get a list of all ids of the articles found
                 ids = [x.news_id for x in result]
                 #we get the original articles based on their ids
-                articles = [x for x in jlist if x["id"] in ids]
+                articles = [x for x in noticias if x["id"] in ids]
 
-                print_snippet(articles, query, 20)
+                self.print_snippet(articles, query, 20)
         return len(result)  # para verificar los resultados (op: -T)
 
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
+
+    def getNoticias(self):
+        #we get a list of pairs [filename, news_id]
+        ndocs = self.news
+        filenames = set()
+        newsid = set()
+        articles = set()
+        #we store all filenames and news_id to search
+        for x in ndocs:
+            doc = x.split(": ")
+            filename = doc[0]
+            filenames.add(filename)
+            nid = doc[1]
+            newsid.add(nid)
+        filenames = list(filenames)
+        newsid = list(newsid)
+        for f in filenames:
+            with open(f) as fh:
+                jlist = json.load(fh)
+                articles += [x for x in jlist if x["id"] in newsid]
+        return articles
 
     def print_snippet(self, articles, query, range):
         for token in query:
@@ -852,6 +871,7 @@ class SAR_Project:
                     if(rpos == -1): rpos = len(text)
                     snippet = text[lpos:rpos]
                     print(str(token) + "->\t" + article["title"] + ":\n(#)..." + snippet + "...(#)")
+                    break
         return
 
 
