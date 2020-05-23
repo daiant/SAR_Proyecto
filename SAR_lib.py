@@ -442,7 +442,8 @@ class SAR_Project:
                     elif (obj[0] == State.OP):
                         #Puede ser AND NOT u OR NOT.
                         if (stack[-1][1] == "AND"):
-                            stack[-1][1] = "AND NOT"
+                            stack.pop()
+                            stack.append((state,"AND NOT"))
                         elif (stack[-1][1] == "OR"):
                             stack.append(obj)
                             ornot=True
