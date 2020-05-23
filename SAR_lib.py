@@ -577,6 +577,7 @@ class SAR_Project:
         """
 
         stem = self.stemmer.stem(term)
+        print("Longitud p1:{}".format(len(self.sindex[field][stem])))
         return self.sindex[field][stem]
 
         ####################################################
