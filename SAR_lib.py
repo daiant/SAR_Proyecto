@@ -255,13 +255,65 @@ class SAR_Project:
             for word in self.index[section]:
                 stem = self.stemmer.stem(word)
                 self.sindex[section][stem] = self.sindex[section].get(stem, []) # si no existe se crea una lista
-                self.sindex[section][stem] += self.index[section][word] # se unen al stem las estadísticas de la palabra. OJO de index
+                #No podemos añadir directamente las news_id porque no estarán en orden
+                #Usamos el algoritmo de fusión del mergesort: fusionar dos listas ya ordenadas
+                i=0
+                j=0
+                newStem=None
+                newIndex=None
+                res=[]
+                while (i<len(self.sindex[section][stem])) and (j < len(self.index[section][word])):
+                    newStem=self.sindex[section][stem][i].news_id
+                    newIndex=self.index[section][word][j].news_id
+                    if (newStem < newIndex):
+                        #Äñadir posting del indice de stem
+                        res.append(self.sindex[section][stem][i])
+                        i+=1
+                    elif (newStem > newIndex):
+                        #Añadir posting del indice de la palabra
+                        res.append(self.index[section][word][j])
+                        j+=1
+                    else:
+                        #Los postings son iguales, hay dos palabras que son iguales y tenemos que añadir sus posiciones en orden
+                        pos=self.fusion(self.sindex[section][stem][i].pos, self.index[section][word][j].pos)
+                        res.append(Posting(newStem, (self.sindex[section][stem][i].frequency + self.index[section][word][j].frequency), pos))
+                        i+=1
+                        j+=1
+                while (i<len(self.sindex[section][stem])):
+                    res.append(self.sindex[section][stem][i])
+                    i+=1
+                while (j<len(self.index[section][word])):
+                    res.append(self.index[section][word][j])
+                    j+=1
+                    
+                self.sindex[section][stem] = res # se unen al stem las estadísticas de la palabra. OJO de index
 
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
         ####################################################
 
-
+    def fusion(self, l1, l2):
+        i=0
+        j=0
+        res=[]
+        while (i<len(l1)) and (j < len(l2)):
+            if (l1[i]<l2[j]):
+                res.append(l1[i])
+                i+=1
+            elif (l1[i]>l2[j]):
+                res.append(l2[j])
+                j+=1
+            else:
+                res.append(l1[i])
+                i+=1
+                j+=1
+        while (i<len(l1)):
+            res.append(l1[i])
+            i+=1
+        while (j<len(l2)):
+            res.append(l2[j])
+            j+=1
+        return res
 
     def make_permuterm(self):
         """
