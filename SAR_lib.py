@@ -841,7 +841,7 @@ class SAR_Project:
 
     def getNoticias(self):
         #we get a list of pairs [filename, news_id]
-        ndocs = self.news
+        ndocs = self.news.values()
         filenames = set()
         newsid = set()
         articles = set()
