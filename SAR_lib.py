@@ -549,7 +549,7 @@ class SAR_Project:
                 while(x < len(pos1)): # se detiene solo si x excede la cantidad de pos de p1
                     print("dentro de p1, analizando posición {}".format(x))
                     while (y < len(pos2)): # se detiene solo si x excede la cantidad de pos de p1
-                    print("dentro de p2, analizando posición {}".format(y))
+                    #print("dentro de p2, analizando posición {}".format(y))
                         if(pos2[y]-pos1[x] == 1): # si pos2 es inmediatamente posterior a pos1:
                             positions.append(pos2[y]) # en ese caso se añade la posición posterior a la lista de posiciones
                             x=x+1 #una vez encontradas las posiciones contiguas avanzamos
@@ -848,7 +848,7 @@ class SAR_Project:
         ndocs = self.news.values()
         filenames = set()
         newsid = set()
-        articles = set()
+        articles = list()
         #we store all filenames and news_id to search
         for ndoc in ndocs:
             doc = ndoc.split(": ")
@@ -861,8 +861,8 @@ class SAR_Project:
         for f in filenames:
             with open(f) as fh:
                 jlist = json.load(fh)
-                articles = articles.union(set([x for x in jlist if x["id"] in newsid]))
-        return list(articles)
+                articles += [x for x in jlist if x["id"] in newsid]
+        return articles
 
     def print_snippet(self, articles, query, range):
         for token in query:
