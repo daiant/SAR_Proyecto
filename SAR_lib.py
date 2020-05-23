@@ -512,11 +512,11 @@ class SAR_Project:
         #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
         p1 = self.get_stemming(terms[0],field)
         for i in range(1,len(terms)):
-            p1 = interseccion_posicional(p1,self.get_stemming(terms[i],field))
+            p1 = self.interseccion_posicional(p1,self.get_stemming(terms[i],field))
         return p1
 
 
-    def interseccion_posicional(p1,p2):
+    def interseccion_posicional(self,p1,p2):
         #recupera una posting list con los valores Posting de términos consecutivos
         #p1, p2: posting lists, posición en p1 debe ser menor que la de p2
         res = []
