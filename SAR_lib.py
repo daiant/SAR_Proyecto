@@ -194,7 +194,7 @@ class SAR_Project:
             jlist = json.load(fh)
             for noticia in jlist:
                 self.news_id += 1 # id de la noticia
-                self.news[self.news_id] = self.docs[self.doc_id] + ": " + noticia["id"] # Sé que se podría hacer con filename
+                self.news[self.news_id] = self.docs[self.doc_id] + "$$$" + noticia["id"] # Sé que se podría hacer con filename
                                                                                         # pero esto me parece más limpio
                 for section in self.sections: # por el multifield
                     content = noticia[section]
@@ -833,7 +833,7 @@ class SAR_Project:
                 #we change the int ids to the hashed ids of the articles
                 hids = set()
                 for id in ids:
-                    hids = hids.union(self.news[id].split(": ")[1])
+                    hids = hids.union(self.news[id].split("$$$")[1])
                 hids = list(hids)
                 #we get the original articles based on their ids
                 articles = [x for x in noticias if x["id"] in hids]
@@ -853,7 +853,7 @@ class SAR_Project:
         articles = list()
         #we store all filenames and news_id to search
         for ndoc in ndocs:
-            doc = ndoc.split(": ")
+            doc = ndoc.split("$$$")
             filename = doc[0]
             filenames.add(filename)
             nid = doc[1]
