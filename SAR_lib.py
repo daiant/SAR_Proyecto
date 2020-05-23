@@ -490,7 +490,7 @@ class SAR_Project:
             return self.get_positionals(term_t, field)
         else:
             if(use_stemming):
-                return self.get_stemming[field][term_t]
+                return self.get_stemming(term_t[0],field)
             else:
                 return self.index[field][term_t])
 
@@ -543,7 +543,7 @@ class SAR_Project:
                 pos2 = p2[j].pos #pos2 = lista de posiciones de p2[2]
                 while(x < pos1): #vamos recorriendo pos1
                     while (y < pos2): #recorremos pos2
-                        if(abs(pos2[y]-pos1[x]) <= 1):
+                        if(abs(pos2[y]-pos1[x]) <= 1): #
                             aux.append(pos2[y])
                             if(pos2[y] > pos1[x]):
                                 break
