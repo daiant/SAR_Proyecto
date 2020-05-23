@@ -557,7 +557,7 @@ class SAR_Project:
                             positions.append(pos2[y]) # en ese caso se añade la posición posterior a la lista de posiciones
                             x=x+1 #una vez encontradas las posiciones contiguas avanzamos
                             y=y+1
-                            
+
                         elif(pos2[y] > pos1[x]): #si pos2 está por encima de pos1, aumentar pos1 y volver a probar
                             x=x+1
                         else:                   # else solo si pos1 es mayor que pos2, aumentamos pos2 y probar otra vez
@@ -588,7 +588,7 @@ class SAR_Project:
         """
 
         stem = self.stemmer.stem(term)
-        return self.sindex[field][stem]
+        return self.sindex[field].get(stem, None)
 
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
@@ -829,7 +829,7 @@ class SAR_Project:
         noticias = self.getNoticias()
         if self.use_ranking:
             result = self.rank_result(result, query)
-        print("%s\t%d" % (query, len(result)))
+        #print("%s\t%d" % (query, len(result)))
         if self.show_snippet:
             if result != []:
                 #we get a list of all ids of the articles found
