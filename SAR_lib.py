@@ -260,7 +260,7 @@ class SAR_Project:
 
                 if len(self.sindex[section][stem]) > 1:
                     self.sindex[section][stem].sort()
-                
+
                 """
                 stemList=self.sindex[section][stem]
                 indexList=self.index[section][word]
@@ -293,10 +293,10 @@ class SAR_Project:
                         res.append(stemList[i])
                         i+=1
                         j+=1
-                
+
                 if (i<len(stemList)):
                     res += stemList[i:]
-                
+
                 if (j < len(indexList)):
                     res += indexList[j:]
 
@@ -421,7 +421,7 @@ class SAR_Project:
         #Si aparece un token después de un token hay que hacer un and entre los dos.
         #En ese caso añadiremos un AND a la pila de objetos que quedará como resultado
         token_after_token = False
-        print("query:{}".format(query))
+        # print("query:{}".format(query))
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
         tokens.wordchars += 'áéíóúüÁÉÍÓÚÜñ'
         elements=[]
@@ -430,7 +430,7 @@ class SAR_Project:
         terms=[]
 
         while (t != ''):
-            print("token:{}".format(t))
+            # print("token:{}".format(t))
             if (t == 'AND') or (t == 'OR') or (t == 'NOT'):
                 elements.append((State.OP, t))
                 t = tokens.get_token()
@@ -558,7 +558,7 @@ class SAR_Project:
 
         """
         term_t = self.tokenize(term)
-        print("term_tokenized: {}".format(term_t))
+        # print("term_tokenized: {}".format(term_t))
         #obtenemos el/los términos en formato token
         if (len(term_t) > 1): #si hay más de un término se aplica el stemming a cada término individual y se llama a get_positionals
             return self.get_positionals(term_t, field)
@@ -774,6 +774,7 @@ class SAR_Project:
         """
         NECESARIO PARA TODAS LAS VERSIONES
 
+
         Calcula el OR de dos posting list de forma EFICIENTE
 
         param:  "p1", "p2": posting lists sobre las que calcular
@@ -804,6 +805,10 @@ class SAR_Project:
             else:
                 res.append(p2[j])
                 j+=1
+        if i < len(p1):
+            res+= p1[i:]
+        if j < len(p2):
+            res+=p2[j:]
         return res
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
@@ -845,7 +850,7 @@ class SAR_Project:
                 i+=1
             else:
                 j+=1
-                
+
         while (i < len(p1)):
             res.append(p1[i])
             i+=1
@@ -901,7 +906,7 @@ class SAR_Project:
         noticias = self.getNoticias()
         if self.use_ranking:
             result = self.rank_result(result, query)
-        #print("%s\t%d" % (query, len(result)))
+        print("%s\t%d" % (query, len(result)))
         if self.show_snippet:
             if result != []:
                 #we get a list of all ids of the articles found
