@@ -954,11 +954,6 @@ class Posting:
             return self.news_id == other.news_id
         else:
             return NotImplemented
-    def __lt__(self, other):
-        if isinstance(other, Posting):
-            return self.news_id < other.news_id
-        else:
-            return NotImplemented
 
     def __str__(self):
         rep = "ID:{},freq:{}".format(self.news_id, self.frequency)
