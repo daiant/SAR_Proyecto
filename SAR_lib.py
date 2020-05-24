@@ -423,6 +423,7 @@ class SAR_Project:
         token_after_token = False
         print("query:{}".format(query))
         tokens = shlex.shlex(instream=query, posix=False, punctuation_chars=True)
+        tokens.wordchars += 'áéíóúüÁÉÍÓÚÜñ'
         elements=[]
         t = tokens.get_token()
 
@@ -713,7 +714,7 @@ class SAR_Project:
         #IMPORTANTE: p y news están ordenados
         j = 0   #El índice de la noticia que queremos omitir
         #Se puede hacer en tiempo lineal con la talla de news
-        keys = self.news.keys()
+        keys = list(self.news.keys())
         for i in range(0,len(keys)):
             #p[j] es un objeto de tipo Posting
             if (keys[i] != p[j].news_id):
