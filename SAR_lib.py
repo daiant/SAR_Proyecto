@@ -500,6 +500,7 @@ class SAR_Project:
             return self.get_positionals(term_t, field)
         else:
             if(self.use_stemming):
+                print("hola:{}".format(term_t))
                 return self.get_stemming(term_t[0],field)
             else:
                 return self.index[field].get(term_t[0], [])
@@ -841,27 +842,35 @@ class SAR_Project:
         queryTerms = sq[1]
         noticias = self.getNoticias()
         if self.use_ranking:
-            result = self.rank_result(result, query)
-        print("%s\t%d" % (query, len(result)))
-        if self.show_snippet:
-            if result != []:
-                #we get a list of all ids of the articles found
-                ids = [x.news_id for x in result]
-                #we change the int ids to the hashed ids of the articles
-                hids = list()
-                for id in ids:
-                    aa = self.news[id].split("$$$")[1]
-                    hids.append(aa)
+            result = self.rank_result(result, queryTerms)
+
+        print("Query: {}\nNumber of results: {}\n".format(query, len(result)))
+        if result != []:
+            #we get a list of all ids of the articles found
+            ids = [x.news_id for x in result]
+            #we change the int ids to the hashed ids of the articles
+            hids = list()
+            for id in ids:
+                aa = self.news[id].split("$$$")[1]
+                hids.append(aa)
                 hids = list(hids)
                 #we get the original articles based on their ids
                 articles = [x for x in noticias if x["id"] in hids]
-
-                self.print_snippet(articles, queryTerms, 20)
+        if self.show_snippet:
+                self.print_snippet(articles, queryTerms, ids, 20)
+        else:
+            self.print_default(articles, ids)
         return len(result)  # para verificar los resultados (op: -T)
 
         ########################################
         ## COMPLETAR PARA TODAS LAS VERSIONES ##
         ########################################
+
+    def print_default(self, articles, ids):
+        id = 0
+        for article in articles:
+            print("#{} \t ({}) ({}) {} \t ({})".format(id, ids[id], article["date"], article["title"], article["keywords"]))
+            id+=1
 
     def getNoticias(self):
         #we get a list of pairs [filename, news_id]
@@ -884,23 +893,29 @@ class SAR_Project:
                 articles += [x for x in jlist if x["id"] in newsid]
         return articles
 
-    def print_snippet(self, articles, query, range):
-        for token in query:
-            i=0
-            for article in articles:
+    def print_snippet(self, articles, query, ids, range):
+        id = 1
+        i=0
+        for article in articles:
+            print("#{}\n{}\nDate: {}\nTitle: {}\nKeywords: {}".format(id, ids[id-1], article["date"], article["title"], article["keywords"]))
+            id+=1
+            i+=1
+            for token in query:
                 #let's try and find the first instance of the token in the articles of the result
                 text = article["article"].lower()
                 pos = text.find(str(token.lower()))
                 if(pos != -1):
-                    i+=1
                     #we found the instance of token at pos, let's get a snippet
                     lpos = max(0, text.rfind(" ", 0, pos-range)) #left side of the snippet
                     rpos = min(len(text), text.find(" ",pos+range)) #right side of the snippet
                     if(rpos == -1): rpos = len(text)
                     snippet = article["article"][lpos:rpos]
-                    print(str(token) + "->\t" + article["title"] + ":\n(#)..." + snippet + "...(#)")
-                    if not(self.show_all) and i>9:
-                        break
+                    print("(#)..." + snippet + "...(#)")
+            if id-1 < len(ids):
+                print("-------------")
+            if not(self.show_all) and i>9:
+                break
+        print("==========")
         return
 
 
