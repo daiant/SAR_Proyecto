@@ -255,80 +255,13 @@ class SAR_Project:
             for word in self.index[section]:
                 stem = self.stemmer.stem(word)
                 self.sindex[section][stem] = self.sindex[section].get(stem, []) # si no existe se crea una lista
-                """
-                self.sindex[section][stem] += self.index[section][word]
+                self.sindex[section][stem] = self.or_posting(self.sindex[section][stem], self.index[section][word])
+                # La llamada a or_posting es porque necesitamos ordenar las listas para las consultas y or posting lo hace genial.
 
-                if len(self.sindex[section][stem]) > 1:
-                    self.sindex[section][stem].sort()
-
-                """
-                stemList=self.sindex[section][stem]
-                indexList=self.index[section][word]
-                if (len(stemList)==0):
-                    self.sindex[section][stem] = indexList
-                    continue
-                elif (len(indexList)==0):
-                    continue
-                #Si no, tenemos noticias que añadir al termino stem
-                #No podemos añadir directamente las news_id porque no estarán en orden
-                #Usamos el algoritmo de fusión del mergesort: fusionar dos listas ya ordenadas
-                i=0
-                j=0
-                newStem=None
-                newIndex=None
-                res=[]
-                while (i<len(stemList)) and (j < len(indexList)):
-                    newStem=stemList[i].news_id
-                    newIndex=indexList[j].news_id
-                    if (newStem < newIndex):
-                        #Äñadir posting del indice de stem
-                        res.append(stemList[i])
-                        i+=1
-                    elif (newStem > newIndex):
-                        #Añadir posting del indice de la palabra
-                        res.append(indexList[j])
-                        j+=1
-                    else:
-                        #Los postings son iguales, hay dos palabras que son iguales. Perderemos información posicional pero no importa porque no usaremos stemming en consultas posicionales
-                        res.append(stemList[i])
-                        i+=1
-                        j+=1
-
-                if (i<len(stemList)):
-                    res += stemList[i:]
-
-                if (j < len(indexList)):
-                    res += indexList[j:]
-
-                self.sindex[section][stem] = res # se unen al stem las estadísticas de la palabra. OJO de index
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
         ####################################################
 
-    """
-    def fusion(self, l1, l2):
-        i=0
-        j=0
-        res=[]
-        while (i<len(l1)) and (j < len(l2)):
-            if (l1[i]<l2[j]):
-                res.append(l1[i])
-                i+=1
-            elif (l1[i]>l2[j]):
-                res.append(l2[j])
-                j+=1
-            else:
-                res.append(l1[i])
-                i+=1
-                j+=1
-        while (i<len(l1)):
-            res.append(l1[i])
-            i+=1
-        while (j<len(l2)):
-            res.append(l2[j])
-            j+=1
-        return res
-    """
     def make_permuterm(self):
         """
         NECESARIO PARA LA AMPLIACION DE PERMUTERM
