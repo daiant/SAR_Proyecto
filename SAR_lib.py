@@ -260,15 +260,23 @@ class SAR_Project:
 
                 if len(self.sindex[section][stem]) > 1:
                     self.sindex[section][stem].sort()
-                    """
+                
+                """
+                stemList=self.sindex[section][stem]
+                indexList=self.index[section][word]
+                if (len(stemList)==0):
+                    self.sindex[section][stem] = indexList
+                    continue
+                elif (len(indexList)==0):
+                    continue
+                #Si no, tenemos noticias que añadir al termino stem
                 #No podemos añadir directamente las news_id porque no estarán en orden
                 #Usamos el algoritmo de fusión del mergesort: fusionar dos listas ya ordenadas
+                print("merging in stem {} with word {}".format(stem, word))
                 i=0
                 j=0
                 newStem=None
                 newIndex=None
-                stemList=self.sindex[section][stem]
-                indexList=self.index[section][word]
                 res=[]
                 while (i<len(stemList)) and (j < len(indexList)):
                     newStem=stemList[i].news_id
@@ -282,24 +290,23 @@ class SAR_Project:
                         res.append(indexList[j])
                         j+=1
                     else:
-                        #Los postings son iguales, hay dos palabras que son iguales y tenemos que añadir sus posiciones en orden
-                        pos=self.fusion(stemList[i].pos, indexList[j].pos)
-                        res.append(Posting(newStem, (stemList[i].frequency + indexList[j].frequency), pos))
+                        #Los postings son iguales, hay dos palabras que son iguales. Perderemos información posicional pero no importa porque no usaremos stemming en consultas posicionales
+                        res.append(stemList[i])
                         i+=1
                         j+=1
-                while (i<len(stemList)):
-                    res.append(stemList[i])
-                    i+=1
-                while (j<len(indexList)):
-                    res.append(indexList[j])
-                    j+=1
-
+                
+                if (i<len(stemList)):
+                    res += stemList[i:]
+                
+                if (j < len(indexList)):
+                    res += indexList[j:]
 
                 self.sindex[section][stem] = res # se unen al stem las estadísticas de la palabra. OJO de index
         ####################################################
         ## COMPLETAR PARA FUNCIONALIDAD EXTRA DE STEMMING ##
         ####################################################
 
+    """
     def fusion(self, l1, l2):
         i=0
         j=0
@@ -322,7 +329,7 @@ class SAR_Project:
             res.append(l2[j])
             j+=1
         return res
-
+    """
     def make_permuterm(self):
         """
         NECESARIO PARA LA AMPLIACION DE PERMUTERM
@@ -581,14 +588,17 @@ class SAR_Project:
 
         """
         #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
+        """
         if(self.use_stemming):
             p1 = self.get_stemming(terms[0],field)
             for i in range(1,len(terms)):
                 p1 = self.interseccion_posicional(p1,self.get_stemming(terms[i],field))
         else:
-            p1 = self.index[field].get(terms[0], [])
-            for i in range(1,len(terms)):
-                p1 = self.interseccion_posicional(p1,self.index[field].get(terms[i], []))
+        """
+        #Para las consultas posicionales ignoramos el stemming
+        p1 = self.index[field].get(terms[0], [])
+        for i in range(1,len(terms)):
+            p1 = self.interseccion_posicional(p1,self.index[field].get(terms[i], []))
         return p1
 
 
