@@ -187,31 +187,30 @@ class SAR_Project:
 
         with open(filename) as fh:
             if self.multifield:
-                self.sections = ['title', 'keywords', "article", 'summary']
+                self.sections = ['title', 'keywords', "article", 'summary'] # si es multifield se actualizan las secciones a indexar
 
-            self.doc_id += 1 # id del filename
-            self.docs[self.doc_id] = filename
+            self.doc_id += 1 # id del filename (clave)
+            self.docs[self.doc_id] = filename # el valor es la ruta
             jlist = json.load(fh)
             for noticia in jlist:
-                self.news_id += 1 # id de la noticia
-                self.news[self.news_id] = self.docs[self.doc_id] + "$$$" + noticia["id"] # Sé que se podría hacer con filename
-                                                                                        # pero esto me parece más limpio
+                self.news_id += 1 # id de la noticia (clave)
+                self.news[self.news_id] = self.docs[self.doc_id] + "$$$" + noticia["id"] # el valor será la ruta del documento donde se encuentra y el hash propio de la noticia.
                 for section in self.sections: # por el multifield
-                    content = noticia[section]
+                    content = noticia[section] # contenido raw
                     tokens = self.tokenize(content)
                     aux = {}
                     position = {}
                     pos = 0
                     for token in tokens:
-                        aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias
+                        aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias del token
                     if self.positional:
                         for token in tokens:
-                            pos+=1
+                            pos+=1 # contador para saber en qué posición está cada token
                             position[token] = position.get(token, [])
-                            position[token].append(pos)
+                            position[token].append(pos) # lista de todas las posiciones del token
                     for word in aux:
                         self.index[section][word] = self.index[section].get(word, []) # si no existe se crea una lista
-                        self.index[section][word].append(Posting(self.news_id, aux[word], position.get(word, None))) # se crea el posting del token en la noticia en la sección
+                        self.index[section][word].append(Posting(self.news_id, aux[word], position.get(word, None))) # se crea el posting_list del token en la noticia en la sección
         #
         # "jlist" es una lista con tantos elementos como noticias hay en el fichero,
         # cada noticia es un diccionario con los campos:
@@ -252,10 +251,10 @@ class SAR_Project:
 
         """
         for section in self.sections:
-            for word in self.index[section]:
-                stem = self.stemmer.stem(word)
-                self.sindex[section][stem] = self.sindex[section].get(stem, []) # si no existe se crea una lista
-                self.sindex[section][stem] = self.or_posting(self.sindex[section][stem], self.index[section][word])
+            for word in self.index[section]: # recorre el indice normal en busca de palabras
+                stem = self.stemmer.stem(word) # crea un stem de la palabra
+                self.sindex[section][stem] = self.sindex[section].get(stem, []) # si no existe el stem se crea una lista
+                self.sindex[section][stem] = self.or_posting(self.sindex[section][stem], self.index[section][word]) # añade las posting list de word al stem de esa word
                 # La llamada a or_posting es porque necesitamos ordenar las listas para las consultas y or posting lo hace genial.
 
         ####################################################
@@ -372,7 +371,7 @@ class SAR_Project:
             elif (t[0] == '(') or (t[0] == ')'):
                 for ch in t:
                     elements.append((State.PAR, ch))
-                
+
                 t = tokens.get_token()
                 token_after_token = False
 
