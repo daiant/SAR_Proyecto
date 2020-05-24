@@ -767,10 +767,6 @@ class SAR_Project:
             else:
                 j+=1
 
-        while (i < len(p1)):
-            res.append(p1[i])
-            i+=1
-
         return res
 
 
@@ -849,6 +845,10 @@ class SAR_Project:
                 i+=1
             else:
                 j+=1
+                
+        while (i < len(p1)):
+            res.append(p1[i])
+            i+=1
 
         return res
 
