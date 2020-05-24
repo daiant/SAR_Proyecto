@@ -368,9 +368,11 @@ class SAR_Project:
                 elements.append((State.OP, t))
                 t = tokens.get_token()
                 token_after_token = False
-
-            elif (t == '(') or (t == ')'):
-                elements.append((State.PAR, t))
+            #Pueden haber varios parentesis en un token
+            elif (t[0] == '(') or (t[0] == ')'):
+                for ch in t:
+                    elements.append((State.PAR, ch))
+                
                 t = tokens.get_token()
                 token_after_token = False
 
@@ -393,6 +395,7 @@ class SAR_Project:
                         terms.append(t)
                     t = tokens.get_token()
                 else:   #no multifield
+                    print("term:{}".format(t0))
                     elements.append((State.POST, self.get_posting(t0)))
                     if (t0[0]=='"'):
                         terms.append(t0[1:-1])
@@ -835,7 +838,7 @@ class SAR_Project:
         """
         sq = self.solve_query(query)
         result = sq[0]
-        query = sq[1]
+        queryTerms = sq[1]
         noticias = self.getNoticias()
         if self.use_ranking:
             result = self.rank_result(result, query)
@@ -853,7 +856,7 @@ class SAR_Project:
                 #we get the original articles based on their ids
                 articles = [x for x in noticias if x["id"] in hids]
 
-                self.print_snippet(articles, query, 20)
+                self.print_snippet(articles, queryTerms, 20)
         return len(result)  # para verificar los resultados (op: -T)
 
         ########################################
