@@ -640,19 +640,21 @@ class SAR_Project:
         """
         res = []
         #IMPORTANTE: p y news están ordenados
+        i=0
         j = 0   #El índice de la noticia que queremos omitir
         #Se puede hacer en tiempo lineal con la talla de news
         keys = list(self.news.keys())
-        for i in range(0,len(keys)):
-            #p[j] es un objeto de tipo Posting
-            if (keys[i] != p[j].news_id):
-                #Añadimos un posting correspondiente a la noticia (perdemos frequency y positional pero no importa)
-                res.append(Posting(keys[i]))
-            else:
-                j+=1
-                if (j == len(p)):
-                    i+=1
-                    break #Todas las demás noticias no están en p y deben ser añadidas
+        if (len(p)>0):
+            for i in range(0,len(keys)):
+                #p[j] es un objeto de tipo Posting
+                if (keys[i] != p[j].news_id):
+                    #Añadimos un posting correspondiente a la noticia (perdemos frequency y positional pero no importa)
+                    res.append(Posting(keys[i]))
+                else:
+                    j+=1
+                    if (j == len(p)):
+                        i+=1
+                        break #Todas las demás noticias no están en p y deben ser añadidas
 
         for k in range(i,len(keys)):
             res.append(Posting(keys[k]))

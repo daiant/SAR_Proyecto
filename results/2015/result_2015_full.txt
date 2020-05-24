@@ -102,8 +102,3 @@ keywords:precio OR (keywords:economía AND banco)	0
 keywords:precio OR (keywords:economía AND "banco")	0
 keywords:"precio" OR (keywords:economía AND "banco")	0
 keywords:precio OR NOT (keywords:economía AND banco)	803
-c*sa AND (keywords:restaurantes OR Carmena)	8
-c*sa AND (keywords:restaurantes OR date:201*10)	8
-c*sa AND (keywords:restaurantes AND title:"el país") OR date:201*10	23
-c*sa AND keywords:restaurantes AND (title:"el país" OR date:201*3)	0
-c*sa AND (keywords:restaurantes AND (title:"el país" OR date:201*3))	0
