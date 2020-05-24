@@ -272,7 +272,6 @@ class SAR_Project:
                 #Si no, tenemos noticias que añadir al termino stem
                 #No podemos añadir directamente las news_id porque no estarán en orden
                 #Usamos el algoritmo de fusión del mergesort: fusionar dos listas ya ordenadas
-                print("merging in stem {} with word {}".format(stem, word))
                 i=0
                 j=0
                 newStem=None
@@ -588,13 +587,6 @@ class SAR_Project:
 
         """
         #Max: Este es el algoritmo visto en teoría de intersección posicional con k=1 (términos consecutivos)
-        """
-        if(self.use_stemming):
-            p1 = self.get_stemming(terms[0],field)
-            for i in range(1,len(terms)):
-                p1 = self.interseccion_posicional(p1,self.get_stemming(terms[i],field))
-        else:
-        """
         #Para las consultas posicionales ignoramos el stemming
         p1 = self.index[field].get(terms[0], [])
         for i in range(1,len(terms)):
