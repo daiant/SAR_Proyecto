@@ -453,11 +453,11 @@ class SAR_Project:
                 if (t == ':'):  #it's a multifield term and t0 is the field
                     t = tokens.get_token() #t is now the token to search
                     elements.append((State.POST, self.get_posting(t, field=t0)))
-                    t = tokens.get_token()
                     if (t[0]=='"'):
                         terms.append(t[1:-1])
                     else:
                         terms.append(t)
+                    t = tokens.get_token()
                 else:   #no multifield
                     elements.append((State.POST, self.get_posting(t0)))
                     if (t0[0]=='"'):
