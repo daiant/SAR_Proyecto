@@ -3,6 +3,7 @@ from nltk.stem.snowball import SnowballStemmer
 import os
 import re
 import shlex
+import spellsuggest
 from enum import Enum, auto
 
 class SAR_Project:
@@ -65,13 +66,20 @@ class SAR_Project:
         self.use_ranking = False  # valor por defecto, se cambia con self.set_ranking()
         self.sections = ["article"]
 
-
+        #ALGORITMICA
+        self.vocabulary = []
+        self.threshold = 2
+        self.algorithm = "lev"
     ###############################
     ###                         ###
     ###      CONFIGURACION      ###
     ###                         ###
     ###############################
 
+    def set_threshold(self, t):
+        self.threshold = t
+    def set_algorithm(self, a):
+        self.algorithm = a
 
     def set_showall(self, v):
         """
@@ -150,7 +158,6 @@ class SAR_Project:
         los argumentos adicionales "**args" solo son necesarios para las funcionalidades ampliadas
 
         """
-
         self.multifield = args['multifield']
         self.positional = args['positional']
         self.stemming = args['stem']
@@ -164,6 +171,10 @@ class SAR_Project:
         if self.stemming:
             self.make_stemming()
         print("Indexing complete!")
+
+        #ALGORITMICA
+        self.make_vocab()
+
         ##########################################
         ## COMPLETAR PARA FUNCIONALIDADES EXTRA ##
         ##########################################
@@ -203,6 +214,7 @@ class SAR_Project:
                     pos = 0
                     for token in tokens:
                         aux[token] = aux.get(token, 0) + 1 # se cuentan las ocurrencias del token
+                        self.vocabulary.append(token)
                     if self.positional:
                         for token in tokens:
                             pos+=1 # contador para saber en qué posición está cada token
@@ -224,6 +236,13 @@ class SAR_Project:
         ### COMPLETAR ###
         #################
 
+    # ALGORITMICA
+    def make_vocab(self):
+        self.vocabulary = list(set(self.vocabulary))
+        fn = open("vocabulary.txt", "w", encoding="utf-8")
+        for word in self.vocabulary:
+            fn.write(word + " ")
+        fn.close()
 
     def tokenize(self, text):
         """
@@ -788,7 +807,31 @@ class SAR_Project:
 
 
 
+    def related(self, query, terms):
+        """
+        ALGORITMICA
 
+        Devuelve una consulta relacionada a la original en la que se sugieren terminos para los que
+        en principio no estaban en el diccionario
+
+        param: "query": query original que se debe modificar
+
+        param: "terms": terminos con los que buscar relacionados
+
+        return: query modificada
+        """
+
+        sp = spellsuggest.TrieSpellSuggester("./vocabulary.txt")
+        new_query = query
+        for term in terms:
+            if term not in self.vocabulary:
+                rw = sp.suggest(term, threshold=self.threshold, distance=self.algorithm)
+                if rw:
+                    new_query = query.replace(term, list(rw)[0])
+                    query = new_query
+
+        print("Quizá quisiste decir: ", new_query)
+        return new_query
 
 
     #####################################
@@ -809,8 +852,13 @@ class SAR_Project:
         return: el numero de noticias recuperadas, para la opcion -T
 
         """
-        result = self.solve_query(query)[0]
-        print("%s\t%d" % (query, len(result)))
+        result = self.solve_query(query)
+        if len(result[0]) == 0:
+            # ALGORITMICA
+            query = self.related(query, result[1])
+            result = self.solve_query(query)
+        print("%s\t%d" % (query, len(result[0])))
+
         return len(result)  # para verificar los resultados (op: -T)
 
 
@@ -830,6 +878,11 @@ class SAR_Project:
 
         """
         sq = self.solve_query(query)
+        if(len(sq[0]) ==0):
+            # ALGORITMICA
+            query = self.related(query, sq[1])
+            sq = self.solve_query(query)
+
         result = sq[0]
         queryTerms = sq[1]
         noticias = self.getNoticias()
@@ -837,6 +890,7 @@ class SAR_Project:
             result = self.rank_result(result, queryTerms)
 
         print("Query: {}\nNumber of results: {}\n".format(query, len(result)))
+
         if result != []:
             #we get a list of all ids of the articles found
             ids = [x.news_id for x in result]

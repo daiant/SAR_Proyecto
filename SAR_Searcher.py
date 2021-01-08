@@ -40,6 +40,9 @@ if __name__ == "__main__":
     parser.add_argument('-R', '--rank', dest='rank', action='store_true', default=False,
                     help='rank results. Does not apply with -C and -T options.')
 
+    # ALGORITMICA
+    parser.add_argument('-t', '--threshold', type=int, dest="threshold", default=2, help='threshold to suggest terms')
+    parser.add_argument('-a', '--algorithm', type=str, default="levenshtein",dest="algorithm", help='algortithm to suggest terms')
 
     group1 = parser.add_mutually_exclusive_group()
     group1.add_argument('-Q', '--query', dest='query', metavar= 'query', type=str, action='store',
@@ -58,6 +61,8 @@ if __name__ == "__main__":
     searcher.set_ranking(args.rank)
     searcher.set_showall(args.all)
     searcher.set_snippet(args.snippet)
+    searcher.set_algorithm(args.algorithm)
+    searcher.set_threshold(args.threshold)
 
 
     # se debe contar o mostrar resultados?

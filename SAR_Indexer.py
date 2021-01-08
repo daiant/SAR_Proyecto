@@ -15,17 +15,18 @@ if __name__ == "__main__":
     parser.add_argument('index', metavar='index', type=str,
                         help='name of the file to save the project object.')
 
-    parser.add_argument('-S', '--stem', dest='stem', action='store_true', default=False, 
+    parser.add_argument('-S', '--stem', dest='stem', action='store_true', default=False,
                     help='compute stem index.')
 
     parser.add_argument('-P', '--permuterm', dest='permuterm', action='store_true', default=False,
                     help='compute permuterm index.')
 
-    parser.add_argument('-M', '--multifield', dest='multifield', action='store_true', default=False, 
+    parser.add_argument('-M', '--multifield', dest='multifield', action='store_true', default=False,
                     help='compute index for all the fields.')
 
-    parser.add_argument('-O', '--positional', dest='positional', action='store_true', default=False, 
+    parser.add_argument('-O', '--positional', dest='positional', action='store_true', default=False,
                     help='compute positional index.')
+
 
     args = parser.parse_args()
 
